@@ -4,8 +4,6 @@ import time
 import glob
 import os
 
-from . import imgcut, rename
-
 
 def show(image, title=''):
     cv2.imshow('Image Preview : %s' % title, image)
