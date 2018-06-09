@@ -4,8 +4,12 @@
 
 ## 진행상황
 - [x] 레포 등록
-- [ ] AssetBundle 설명 작성
-- [ ] 소녀전선 리소스 추출을 위한 [AssetStudio](https://github.com/Perfare/AssetStudio) 사용법 작성
+- [x] AssetBundle 설명 작성
+- [x] 소녀전선 리소스 추출을 위한 [AssetStudio](https://github.com/Perfare/AssetStudio) 사용법 작성
 - [ ] Alpha 채널이 분리된 이미지 원상복구 방법 작성
 - [ ] [girlsfrontline-resources](https://github.com/36base/girlsfrontline-resources) 에서 사용하는 방식으로의 변환 과정 작성
+- [ ] 오디오 파일 변환 방법 설명
 - [ ] 그 외 생각이 나지 않는 다른 수많은 일들
+
+## Wiki
+[GitHub Wiki](/wiki)에 모든 가이드를 작성해두었습니다. 참조해주세요. 
