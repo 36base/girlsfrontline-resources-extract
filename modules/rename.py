@@ -73,7 +73,7 @@ doll_except = {
     "BB_Noel": "BB-Noel"
 }
 
-with open("data/dollLite.json", 'r', encoding="utf-8") as f:
+with open("data/dollSkin.json", 'r', encoding="utf-8") as f:
     core = json.loads(f.read())
 
 
