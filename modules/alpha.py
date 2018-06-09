@@ -2,7 +2,6 @@ import numpy as np
 import cv2
 import time
 import glob
-from multiprocessing import process, Pool
 import os
 
 from . import imgcut, rename
@@ -53,72 +52,9 @@ def alpha(image_dir):
     return cv2.merge((b, g, r, a))
 
 
-def main(name, mode="", slice_blank=False):
-    '''소녀전선 이미지 리소스를 가공하는 함수입니다.
-
-    Args:
-        name(str) : 일반 이미지 파일 경로 입력
-        mode(str) : 이미지 파일들의 종류. doll, equip 입력 가능
-        slice_blank (bool) : 전신 일러 빈공간 제거 여부 (실험중)
-
-    Return:
-        True
-    '''
-    fdir = os.path.split(name)[0]
-    if mode == "doll":  # 인형 이미지 모드
-        output_name, flag = rename.doll(name, unuse_N=True, flag_filter="N")
-        result_image = alpha(name)
-
-        # Flag별 처리
-        if flag == "N":  # 포트레이트(신), 스킨 분류
-            output_name = "portraits/" + output_name if '_' not in output_name else "portraits/skin/" + output_name
-        elif flag == "E":  # unusE file
-            print()
-            return True  # 건너뛰고 종료.
-        elif flag == "Y":  # dummY file
-            print(name)
-            output_name = "dummy/" + name[len(fdir):]
-
-        # 이미지의 빈공간 제거 여부(실험중). 64픽셀 단위로 제거.
-        if slice_blank:
-            result_image = imgcut.cutimg(result_image)
-    elif mode == "equip":
-        output_name = rename.equip(name)
-        result_image = alpha(name)
-    else:
-        output_name = name[len(fdir):]
-        result_image = alpha(name)
-
-    # 이미지 확인용. 필요시 활성화
-    # print(merged.shape)
-    # show(merged)
-
-    # 저장
-    # cv2.imencode('.png', result_image)[1].tofile("charactor/output/%s.png"%output_name)
-    print("Saved: {0}".format(output_name))
-    return True
-
-
 if __name__ == '__main__':
     # 시간 측정 시작
     start_time = time.time()
-
-    # ===파일 경로 설정===
-    # 일반/alpha 이미지 파일이 같이 있는 폴더를 입력해주세요.
-    # 폴더의 끝에는 반드시 / 를 붙여주세요.
-    fdir = "charactor/"
-
-    # 파일 목록 불러오기, alpha 파일은 목록에서 제거
-    allFileList = glob.glob(fdir + '*.png')
-    alphaFileList = glob.glob(fdir + '*_Alpha.png')
-    fileList = list(set(allFileList) - set(alphaFileList))
-    fileList.sort()
-
-    # 함수 실행
-    for name in fileList:
-        main(name, mode="doll", slice_blank=True)
-    # pool = Pool(processes=12)
-    # pool.map(main, fileList)
 
     # 시간측정 종료
     print("--- %s seconds ---" % (time.time() - start_time))
