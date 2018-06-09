@@ -24,11 +24,14 @@ def image(path, output_path, flags):
     re_alpha = re.compile("_[Aa]lpha.png")
     re_doll = re.compile("[Pp]ic_.*.png")
     re_equip = re.compile("[^a-z0-9/\\_.-]*")
-    # 출력 폴더 + 더미 폴더 생성
-    os.makedirs(os.path.join(output_path, "dummy"), exist_ok=True)
     # 플래그 처리
     f_unuse_n = True if "-n" in flags else False
     f_split_by_type = True if "-s" in flags else False
+    # 출력 폴더 + 더미 폴더 생성
+    os.makedirs(os.path.join(output_path, "dummy"), exist_ok=True)
+    if f_split_by_type:
+        for i in ["N", "D", "M"]:
+            os.makedirs(os.path.join(output_path, i))
 
     # 목록에 있는 이미지 불러오기
     for file_path in file_list:
