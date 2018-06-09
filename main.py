@@ -22,7 +22,7 @@ def image(path, output_path, flags):
     file_list = glob.glob(os.path.join(path, "*.png"))
     # 정규식 컴파일
     re_alpha = re.compile("_[Aa]lpha.png")
-    re_doll = re.compile("pic_.*.png")
+    re_doll = re.compile("[Pp]ic_.*.png")
     re_equip = re.compile("[^a-z0-9/\\_.-]*")
     # 출력 폴더 + 더미 폴더 생성
     os.makedirs(os.path.join(output_path, "dummy"), exist_ok=True)
