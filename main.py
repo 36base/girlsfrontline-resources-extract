@@ -73,12 +73,18 @@ def main(argv):
     Args:
         argv(list): sys.argv
     '''
-    # args = re.match("(.+.py) *(-[it]*) *([^-.]*)", ' '.join(argv))
-    args = re.match("(.+.py) (.+) (.+)", ' '.join(argv))
-    if not args:
-        print("main.py [dir] [output dir] (flags)")
-        return
-    path, output_path, *flags = argv[1:]
+    if len(argv) > 1:
+        args = re.match("(.+) (.+) (.+)", ' '.join(argv))
+        if not args:
+            print("main.py [dir] [output dir] (flags)")
+            return
+        path, output_path, *flags = argv[1:]
+    else:
+        print("이미지 폴더 경로 입력 :")
+        path = input()
+        print("출력 폴더 경로 입력")
+        output_path = input()
+        flags = []
 
     if os.path.isdir(path):
         image(path, output_path, flags)
