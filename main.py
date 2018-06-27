@@ -27,6 +27,8 @@ def image(path, output_path, flags):
     # 플래그 처리
     f_unuse_n = True if "-n" in flags else False
     f_split_by_type = True if "-s" in flags else False
+    f_use_skin_id = True if "-i" in flags else False
+    f_get_original_name = True if "-o" in flags else False
     # 출력 폴더 + 더미 폴더 생성
     os.makedirs(os.path.join(output_path, "dummy"), exist_ok=True)
     if f_split_by_type:
@@ -43,7 +45,10 @@ def image(path, output_path, flags):
             # 이미지 로딩 (후 합침)
             img = alpha.alpha(file_path)
             # 이미지 이름 변환 과정, 정규식으로 인형/장비 판단
-            if re_doll.search(file_path):
+            if f_get_original_name:
+                name = os.path.split(file_path)[1]
+                flag = "N"
+            elif re_doll.search(file_path):
                 rn = rename.Doll(file_path)
                 name = rn.get_name(f_unuse_n) + ".png"
                 flag = rn.get_flag()

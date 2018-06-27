@@ -183,7 +183,7 @@ class Doll():
         else:
             return None
 
-    def get_name(self, unuse_N=False):
+    def get_name(self, unuse_N=False, use_skin_id=False):
         '''Return changed name
 
         Arg:
@@ -195,6 +195,8 @@ class Doll():
         oflag = "" if unuse_N and self.flag == "N" else self.flag
         if self.flag == "E":
             return ""
+        elif use_skin_id:
+            return '_'.join([str(name) for name in [self.doll_id, self.skin_id, oflag] if name])
         else:
             return '_'.join([str(name) for name in [self.doll_id, self.skin_num, oflag] if name])
 
