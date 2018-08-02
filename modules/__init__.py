@@ -1,1 +1,0 @@
-__all__ = ['alpha', 'rename', 'imgcut', 'alpha']
