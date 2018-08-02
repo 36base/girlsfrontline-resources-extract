@@ -3,12 +3,14 @@ import re
 import sys
 import os
 
+import change_dir
+
 import abunpack
 import acb2wav
 
 
 def main(file_list: list):
-    if not file_list:
+    if len(file_list) == 1:
         print("가공할 파일을 실행파일에 드래그 & 드롭하거나, 커맨드창에서 순서대로 입력해주세요.")
     for file_dir in file_list:
         re_ab = re.compile(".+[.]ab")
@@ -26,9 +28,6 @@ def main(file_list: list):
 if __name__ == "__main__":
     # 시간측정용
     start_time = time.time()
-
-    # 경로 변경
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
     # 메인 함수, 인자로 파일 목록 전달
     main(sys.argv)

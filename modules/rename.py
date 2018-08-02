@@ -4,7 +4,6 @@ import os
 import configparser
 
 
-print(os.getcwd())
 config = configparser.ConfigParser()
 config.read("config.ini", encoding="utf-8")
 with open(config['json']['doll'], 'r', encoding="utf-8") as f:
@@ -40,14 +39,22 @@ def gfl_core_doll(name: str, sid=0) -> (int, int):
 
 
 def gfl_core_doll_name(name: str) -> str:
+    """이름을 받아서 도감에 있는 이름을 반환하는 함수
+    
+    Args:
+        name(str): 인형 코드네임. 대소문자 구분 X
+    
+    Return:
+        name(str): DB 안에 있는 대소문자 구분된 이름
+    """
     for doll in core:
         if doll["name"].lower() == name.lower():
             return doll["name"]
     else:
-        return ''
+        return name
 
 
-def path_rename(path: str, remove_name=False, remove_skin=True, original_name=True):
+def path_rename(path: str, remove_name=False, remove_skin=True, original_name=True) -> str:
     """Container 경로에 포함된 인형 이름을 규칙에 따라 변환
 
     Args:
@@ -63,8 +70,7 @@ def path_rename(path: str, remove_name=False, remove_skin=True, original_name=Tr
     ori_name = path.split("/")[2]
     re_name = re.match("(.*?)(_[0-9]*)?$", ori_name)
     if re_name:
-        name, skin = re_name.groups()
-        skin = skin[1:]
+        name, skin = re_name.groups('')
 
         if remove_name:
             pass
@@ -73,10 +79,10 @@ def path_rename(path: str, remove_name=False, remove_skin=True, original_name=Tr
                 name = gfl_core_doll_name(name)
             ret = ret + name
 
-        if remove_skin:
+        if remove_skin or not skin:
             pass
         else:
-            ret = f"{ret}_{skin}"
+            ret = ret + skin
     return ret
 
 
@@ -106,7 +112,7 @@ class Equip():
         if re.search('[^a-z0-9/_.-]+[._]', self.name):
             self.flag = "E"
 
-    def get_name(self):
+    def get_name(self) -> str:
         """return name
 
         Return:
@@ -181,7 +187,7 @@ class Doll():
             self.ret.append(name)
             self.flag = "E"
 
-    def get_name(self):
+    def get_name(self) -> str:
         """Return changed name
 
         Return:
