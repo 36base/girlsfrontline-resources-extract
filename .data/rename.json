@@ -1,0 +1,63 @@
+{
+  "equip_cat": {
+    "人形装备": "doll",
+    "弹匣": "ammo",
+    "配件": "accessory"
+  },
+  "equip_type": {
+    "光学瞄准镜": "scope",
+    "全息瞄准镜": "holo",
+    "ACOG瞄准镜": "reddot",
+    "红外夜视仪": "nightvision",
+    "穿甲弹": "apBullet",
+    "状态弹_空尖弹": "hpBullet",
+    "空尖弹": "hpBullet",
+    "马格南弹": "hpBullet_mag",
+    "霰弹": "sgBullet",
+    "高速弹": "hvBullet",
+    "战术核芯片": "chip",
+    "外骨骼": "skeleton",
+    "防弹插板": "armor",
+    "特殊": "special",
+    "消音器": "silencer",
+    "弹链箱": "ammoBox",
+    "伪装披风": "suit"
+  },
+  "equip_etc": {
+    "-": "_",
+    "_N.": ".",
+    "_N1": "_1",
+    "_N2": "_2",
+    "_N3": "_3",
+    "_S.": "_lab.",
+    "_X.": "_x.",
+    "独头弹": "s",
+    "鹿弹": "b",
+    "PTRD": "ptrd",
+    "MP5": "mp5",
+    "UMP": "ump",
+    "MG3": "mg3",
+    "IDW": "idw",
+    "M1918": "m1918",
+    "莫辛纳甘": "m1891",
+    "HK416": "hk416",
+    "阿梅利": "ameli",
+    "M4A1": "m4a1",
+    "M16A1": "m16a1",
+    "M1911": "m1911",
+    "Springfield": "m1903",
+    "AR15": "ar15",
+    "AK": "ak",
+    "Kar98k": "98k",
+    "64式": "64type",
+    "纳甘左轮": "m1895",
+    "FN49": "fn49",
+    "MP446": "mp446",
+    "9A91": "9a91",
+    "FAMAS": "famas"
+  },
+  "doll_except": {
+    "GG_elfeldt": "GG-elfeldt",
+    "BB_Noel": "BB-Noel"
+  }
+}
