@@ -39,6 +39,35 @@ def gfl_core_doll(name, sid=0) -> (int, int):
         return None, None
 
 
+def path_rename(path, remove_name=False, remove_skin=True):
+    """Container 경로에 포함된 인형 이름을 규칙에 따라 변환
+
+    Args:
+        path(str): Container (assets/characters/<name>/spine)
+        remove_name(bool): 이름을 지움
+        remove_skin(bool): 스킨 부분을 지움
+
+    Return:
+        renamed(str): Processed by option
+    """
+    ret = ''
+    ori_name = path.split("/")[2]
+    re_name = re.match("(.*?)(_[0-9]*)?$", ori_name)
+    if re_name:
+        name, skin = re_name.groups()
+        skin = skin[1:]
+        if remove_name:
+            pass
+        else:
+            ret = ret + name
+
+        if remove_skin:
+            pass
+        else:
+            ret = f"{ret}_{skin}"
+    return ret
+
+
 class Equip():
     """중국어로 되어있는 장비이름을 한국어로 대응-변환
 
