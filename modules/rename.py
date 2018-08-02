@@ -114,13 +114,13 @@ class Doll():
             remove_n(bool): _n flag를 지울지 말지 결정
         """
         self.ret = []
-        self.flag = "N"
         re_name = re.search("pic_(.+?)(_[0-9]+)?(_[NnMmDd])?(_alpha)?$", name)
         if re_name:
             # 정규표현식 이용, groups 메소드로 분할
             doll_name, skin_id, flag, alpha = re_name.groups()
             skin_id = int(skin_id[1:]) if skin_id else 0
-            self.flag = flag[-1].upper()
+            # 기본(플래그 없음): S, 중상: D, 포트레이트: N
+            self.flag = flag[-1].upper() if flag else "S"
 
             # 이름/스킨번호 변경
             if name_to_id or skin_id_to_num:
