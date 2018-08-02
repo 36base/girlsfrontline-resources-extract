@@ -104,6 +104,12 @@ vscode
 .history
 
 # resources
-girlsfrontline-resources
 resources
 res
+*.ab
+
+# PyCharm
+.idea
+
+# ETC
+build.bat
