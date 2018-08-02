@@ -166,7 +166,7 @@ class Asset():
         else:
             return None
 
-    def get_resource(self, path_id):
+    def get_resource(self, path_id: int):
         obj = self.asset.objects[path_id]
         if obj.type == 'Texture2D':
             data = obj.read()
@@ -292,9 +292,12 @@ class Asset():
 
             # Character::spine (인형 SD)
             elif eq_path(path, "assets/characters//spine"):
-                res.set_path(f"spine/{path.split('/')[2]}", name)
+                new_path = path.split('/')[2]
                 if config.getboolean("abunpack", "spine_remove_type_ext") and res.ext in ["bytes", "txt"]:
                     res.ext = ""
+                if config.getboolean("abunpack", "spine_folder_skin_id_remove"):
+                    new_path = rename.path_rename(path, original_name=config.getboolean("abunpack", "spine_folder_original_name"))
+                res.set_path(f"spine/{new_path}", name)
                 print("\tCharacter::spine")
 
             # Sprites::skilicon (스킬 아이콘)

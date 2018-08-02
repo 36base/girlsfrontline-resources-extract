@@ -16,7 +16,7 @@ with open(config['json']['rename'], 'r', encoding='utf-8') as f:
     equip_etc = rename_data['equip_etc']
 
 
-def gfl_core_doll(name, sid=0) -> (int, int):
+def gfl_core_doll(name: str, sid=0) -> (int, int):
     """doll.json 에서 인형 id, 스킨 id 읽어오는 함수
 
     Args:
@@ -39,13 +39,22 @@ def gfl_core_doll(name, sid=0) -> (int, int):
         return None, None
 
 
-def path_rename(path, remove_name=False, remove_skin=True):
+def gfl_core_doll_name(name: str) -> str:
+    for doll in core:
+        if doll["name"].lower() == name.lower():
+            return doll["name"]
+    else:
+        return ''
+
+
+def path_rename(path: str, remove_name=False, remove_skin=True, original_name=True):
     """Container 경로에 포함된 인형 이름을 규칙에 따라 변환
 
     Args:
         path(str): Container (assets/characters/<name>/spine)
         remove_name(bool): 이름을 지움
         remove_skin(bool): 스킨 부분을 지움
+        original_name(bool): 대문자를 사용하는 원래 이름을 찾아서 그걸 사용
 
     Return:
         renamed(str): Processed by option
@@ -56,9 +65,12 @@ def path_rename(path, remove_name=False, remove_skin=True):
     if re_name:
         name, skin = re_name.groups()
         skin = skin[1:]
+
         if remove_name:
             pass
         else:
+            if original_name:
+                name = gfl_core_doll_name(name)
             ret = ret + name
 
         if remove_skin:
@@ -75,7 +87,7 @@ class Equip():
         equip_name (str) : 원본 이미지 이름
         adv (bool) : 특수 장비 이름 변환 여부
     """
-    def __init__(self, equip_name, adv=True):
+    def __init__(self, equip_name: str, adv=True):
         self.name = equip_name
         self.flag = "N"
         for i, j in equip_cat.items():
@@ -104,7 +116,7 @@ class Equip():
 
 
 class Doll():
-    def __init__(self, name, name_to_id=True, skin_id_to_num=False, remove_n=False):
+    def __init__(self, name: str, name_to_id=True, skin_id_to_num=False, remove_n=False):
         """Rename Doll resource file
 
         Args:
