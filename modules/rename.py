@@ -14,7 +14,6 @@ with open(config['json']['rename'], 'r', encoding='utf-8') as f:
     equip_cat = rename_data['equip_cat']
     equip_type = rename_data['equip_type']
     equip_etc = rename_data['equip_etc']
-    doll_except = rename_data['doll_except']
 
 
 def gfl_core_doll(name, sid=0) -> (int, int):
@@ -28,11 +27,6 @@ def gfl_core_doll(name, sid=0) -> (int, int):
         doll_id(int): 인형 도감번호
         doll_skin_num(int): 인형 스킨순번. 오류시 0 반환
     """
-
-    # 예외처리
-    for i, j in doll_except.items():
-        if name == j:
-            name = i
     # 아이디/스킨아이디 찾기, 현재 비교시 소문자 변환 과정을 거침
     for doll in core:
         if doll["name"].lower() == name.lower():
@@ -101,7 +95,7 @@ class Doll():
 
             # 이름/스킨번호 변경
             if name_to_id or skin_id_to_num:
-                doll_id, skin_num = gfl_core_doll(doll_name.lower(), skin_id)
+                doll_id, skin_num = gfl_core_doll(doll_name, skin_id)
 
                 # 이름 변경 여부 확인 후 self.ret 에 append
                 if doll_id and name_to_id:
