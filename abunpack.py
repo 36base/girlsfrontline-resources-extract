@@ -13,9 +13,19 @@ from modules import rename
 config = configparser.ConfigParser()
 config.read("config.ini", encoding="utf-8")
 
+save_alpha_image = config.getboolean('abunpack', 'save_alpha_image')
+use_object_name = config.getboolean('abunpack', 'use_object_name')
+
+rn_doll = config.getboolean("abunpack", "rename_doll")
 rn_doll_id = config.getboolean('abunpack', 'rename_doll_id')
 rn_doll_skin_id = config.getboolean('abunpack', 'rename_doll_skin_id')
 rn_remove_n = config.getboolean('abunpack', 'rename_remove_n')
+
+rn_equip = config.getboolean("abunpack", "rename_equip")
+
+sp_remove_type_ext = config.getboolean("abunpack", "spine_remove_type_ext")
+sp_folder_skin_id_remove = config.getboolean("abunpack", "spine_folder_skin_id_remove")
+sp_folder_original_name = config.getboolean("abunpack", "spine_folder_original_name")
 
 
 def make_container(assetbundle_data):
@@ -80,7 +90,7 @@ class ResImage(Resource):
 
     def save(self, compression=5):
         path = os.path.join(self.path, f"{self.name}.{self.ext}")
-        if "_Alpha" in self.name and not config.getboolean('abunpack', 'save_alpha_image'):
+        if "_Alpha" in self.name and not save_alpha_image:
             return
         os.makedirs(self.path, exist_ok=True)
         if len(self.shape) == 2:
@@ -236,7 +246,7 @@ class Asset():
             name, ext = os.path.splitext(name)
             print(f"{path}/{name}")
 
-            if config.getboolean('abunpack', 'use_object_name'):
+            if use_object_name:
                 name = res.obj_name
 
             # Resources::Text::table
@@ -267,7 +277,7 @@ class Asset():
             # Resources::icon::equip (장비 아이콘)
             elif eq_path(path, "assets/resources/dabao/pics/icons/equip"):
                 new_path = "icon/equip"
-                if config.getboolean("abunpack", "rename_equip"):
+                if rn_equip:
                     rn = rename.Equip(name)
                     name = rn.get_name()
                     if rn.flag == 'E':
@@ -278,7 +288,7 @@ class Asset():
             # Character::pic (인형 일러스트)
             elif eq_path(path, "assets/characters//pic"):
                 new_path = "pic"
-                if config.getboolean("abunpack", "rename_doll"):
+                if rn_doll:
                     rn = rename.Doll(name, rn_doll_id, rn_doll_skin_id, rn_remove_n)
                     name = rn.get_name()
                     if rn.flag == 'E':
@@ -293,10 +303,10 @@ class Asset():
             # Character::spine (인형 SD)
             elif eq_path(path, "assets/characters//spine"):
                 new_path = path.split('/')[2]
-                if config.getboolean("abunpack", "spine_remove_type_ext") and res.ext in ["bytes", "txt"]:
+                if sp_remove_type_ext and res.ext in ["bytes", "txt"]:
                     res.ext = ""
-                if config.getboolean("abunpack", "spine_folder_skin_id_remove"):
-                    new_path = rename.path_rename(path, original_name=config.getboolean("abunpack", "spine_folder_original_name"))
+                if sp_folder_skin_id_remove:
+                    new_path = rename.path_rename(path, original_name=sp_folder_original_name)
                 res.set_path(f"spine/{new_path}", name)
                 print("\tCharacter::spine")
 
