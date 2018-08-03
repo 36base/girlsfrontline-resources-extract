@@ -1,6 +1,7 @@
 import time
 import re
 import os
+import sys
 
 import change_dir
 
@@ -32,7 +33,7 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # 메인 함수, 인자로 파일 목록 전달
-    # main(sys.argv)
+    main(sys.argv)
 
     # 시간측정 종료
     print("=== 소모시간 : %s초 ===" % (time.time() - start_time))

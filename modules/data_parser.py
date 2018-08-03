@@ -25,14 +25,12 @@ class Info():
             self.info = json.loads(parser(url_info))
         except ParsingError:
             pass
-        print(self.info)
 
     def __getitem__(self, item):
         return self.info[item]
 
     def dl(self, file_name):
         with open(file_name, 'w', encoding="utf-8") as f:
-            print(self.info[file_name])
             f.write(parser(self.info[file_name]))
 
 
