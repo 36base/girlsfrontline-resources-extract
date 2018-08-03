@@ -15,6 +15,7 @@ config.read("config.ini", encoding="utf-8")
 
 save_alpha_image = config.getboolean('abunpack', 'save_alpha_image')
 use_object_name = config.getboolean('abunpack', 'use_object_name')
+force_alpha_channel_remove = config.getboolean('abunpack', 'force_alpha_channel_remove')
 
 rn_doll = config.getboolean("abunpack", "rename_doll")
 rn_doll_id = config.getboolean('abunpack', 'rename_doll_id')
@@ -87,6 +88,12 @@ class ResImage(Resource):
         self.shape = data.shape
         self.ext = "png"
         self.obj_name = obj_name
+
+    def remove_alpha_channel(self):
+        if self.shape[2] == 4:
+            self.image = self.image[:, :, :3]
+        else:
+            pass
 
     def save(self, compression=5):
         path = os.path.join(self.path, f"{self.name}.{self.ext}")
@@ -337,6 +344,9 @@ class Asset():
 
             # Sprites::skilicon (스킬 아이콘)
             elif eq_path(path, "assets/sprites/ui/icon/skillicon"):
+                if force_alpha_channel_remove and isinstance(res, ResImage):
+                    # 알파 채널 이미지 강제 제거 여부에 따른 결과
+                    res.remove_alpha_channel()
                 res.set_path("icon/skilicon", name)
                 print("\tSprites::skilicon")
 
