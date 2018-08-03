@@ -1,6 +1,5 @@
 import time
 import re
-import sys
 import os
 
 import change_dir
@@ -12,6 +11,7 @@ import acb2wav
 def main(file_list: list):
     if len(file_list) == 1:
         print("가공할 파일을 실행파일에 드래그 & 드롭하거나, 커맨드창에서 순서대로 입력해주세요.")
+        return
     for file_dir in file_list:
         re_ab = re.compile(".+[.]ab")
         re_acb = re.compile(".+[.]acb[.]bytes")
@@ -23,6 +23,8 @@ def main(file_list: list):
             acb2wav.acb2wav(file_dir)
         else:
             continue
+    else:
+        return
 
 
 if __name__ == "__main__":
@@ -30,7 +32,8 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # 메인 함수, 인자로 파일 목록 전달
-    main(sys.argv)
+    # main(sys.argv)
 
     # 시간측정 종료
     print("=== 소모시간 : %s초 ===" % (time.time() - start_time))
+    os.system('pause')
