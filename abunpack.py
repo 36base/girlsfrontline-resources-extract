@@ -264,6 +264,31 @@ class Asset():
                 res.set_path("text/profilesconfig", name)
                 print("\tText::profilesconfig")
 
+            # Resources::Text::avgtxt (일반 전역 대사)
+            elif eq_path(path, "assets/resources/dabao/avgtxt"):
+                res.set_path("text/avgtxt", name)
+                print("\tText::avgtxt")
+
+            # Resources::Text::avgtxt (전투중 전역 대사?)
+            elif eq_path(path, "assets/resources/dabao/avgtxt/battleavg"):
+                res.set_path("text/avgtxt/battleavg", name)
+                print("\tText::avgtxt::battleavg")
+
+            # Resources::Text::avgtxt (개조 스토리)
+            elif eq_path(path, "assets/resources/dabao/avgtxt/memoir"):
+                res.set_path("text/avgtxt/memoir", name)
+                print("\tText::avgtxt::memoir")
+
+            # Resources::Text::avgtxt (스킨 스토리)
+            elif eq_path(path, "assets/resources/dabao/avgtxt/skin"):
+                res.set_path("text/avgtxt/skin", name)
+                print("\tText::avgtxt::skin")
+
+            # Resources::Text::avgtxt (튜토리얼?)
+            elif eq_path(path, "assets/resources/dabao/avgtxt/startavg"):
+                res.set_path("text/avgtxt/startavg", name)
+                print("\tText::avgtxt::startavg")
+
             # Resources::fairy (요정 대형)
             elif eq_path(path, "assets/resources/dabao/pics/fairy"):
                 res.set_path("fairy", name)
