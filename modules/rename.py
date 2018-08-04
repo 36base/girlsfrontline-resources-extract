@@ -26,11 +26,11 @@ class GFLCore():
                 elif doll['id'] == doll_id:
                     self.filtered = doll
                     break
-                else:
-                    continue
+            else:
+                self.filtered = {}
 
     def __getitem__(self, item):
-        return self.filtered[item]
+        return self.filtered.get(item, 0)
 
     def skin_num(self, skin_id: int) -> int:
         if self.filtered:

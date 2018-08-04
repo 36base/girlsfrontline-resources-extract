@@ -404,5 +404,5 @@ def abunpack(file_dir: str):
 if __name__ == "__main__":
     # abunpack("character_m1014.ab")
     # abunpack("dist/sprites_ui.ab")
-    abunpack("dist/character_sv98_502.ab")
+    abunpack("dist/character_theresa.ab")
     print("stop")
