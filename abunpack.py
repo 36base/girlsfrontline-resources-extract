@@ -31,10 +31,10 @@ sp_folder_original_name = config.getboolean("abunpack", "spine_folder_original_n
 
 
 class ImageResource():
-    icon_rate2 = cv2.imread("data/2.png", -1)
-    icon_rate3 = cv2.imread("data/3.png", -1)
-    icon_rate4 = cv2.imread("data/4.png", -1)
-    icon_rate5 = cv2.imread("data/5.png", -1)
+    icon_rate2 = cv2.imread(config['data']['icon_rate2'], -1)
+    icon_rate3 = cv2.imread(config['data']['icon_rate3'], -1)
+    icon_rate4 = cv2.imread(config['data']['icon_rate4'], -1)
+    icon_rate5 = cv2.imread(config['data']['icon_rate5'], -1)
 
 
 def make_container(assetbundle_data):
