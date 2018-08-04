@@ -16,6 +16,7 @@ config.read("config.ini", encoding="utf-8")
 save_alpha_image = config.getboolean('abunpack', 'save_alpha_image')
 use_object_name = config.getboolean('abunpack', 'use_object_name')
 force_alpha_channel_remove = config.getboolean('abunpack', 'force_alpha_channel_remove')
+make_doll_icon = config.getboolean('abunpack', 'make_doll_icon')
 
 rn_doll = config.getboolean("abunpack", "rename_doll")
 rn_doll_id = config.getboolean('abunpack', 'rename_doll_id')
@@ -27,6 +28,13 @@ rn_equip = config.getboolean("abunpack", "rename_equip")
 sp_remove_type_ext = config.getboolean("abunpack", "spine_remove_type_ext")
 sp_folder_skin_id_remove = config.getboolean("abunpack", "spine_folder_skin_id_remove")
 sp_folder_original_name = config.getboolean("abunpack", "spine_folder_original_name")
+
+
+class ImageResource():
+    icon_rate2 = cv2.imread("data/2.png", -1)
+    icon_rate3 = cv2.imread("data/3.png", -1)
+    icon_rate4 = cv2.imread("data/4.png", -1)
+    icon_rate5 = cv2.imread("data/5.png", -1)
 
 
 def make_container(assetbundle_data):
@@ -94,6 +102,25 @@ class ResImage(Resource):
             self.image = self.image[:, :, :3]
         else:
             pass
+
+    def make_icon(self, rank, path, name):
+        if self.shape == (512, 512, 3):
+            if rank == 2:
+                data = ImageResource.icon_rate2[:, :, :]
+            elif rank == 3:
+                data = ImageResource.icon_rate3[:, :, :]
+            elif rank == 4:
+                data = ImageResource.icon_rate4[:, :, :]
+            elif rank == 5:
+                data = ImageResource.icon_rate5[:, :, :]
+            else:
+                return
+            data[31:227, 31:227, :3] = self.image[16:212, 31:227]
+            icon = ResImage(data)
+            icon.set_path(path, name)
+            icon.save()
+        else:
+            return
 
     def save(self, compression=5):
         path = os.path.join(self.path, f"{self.name}.{self.ext}")
@@ -327,6 +354,8 @@ class Asset():
                         new_path = "pic/dummy"
                     if rn.flag == 'N' and rn_remove_n:
                         new_path = "pic/portraits"
+                    if rn.flag == 'N' and make_doll_icon:
+                        res.make_icon(rn.rank, "icon/doll", name)
                 res.set_path(new_path, name)
                 print("\tCharacter::pic")
             elif eq_path(path, "assets/characters//pic_he"):

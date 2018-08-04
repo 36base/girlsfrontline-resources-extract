@@ -6,52 +6,41 @@ import configparser
 
 config = configparser.ConfigParser()
 config.read("config.ini", encoding="utf-8")
-with open(config['json']['doll'], 'r', encoding="utf-8") as f:
-    core = json.loads(f.read())
-with open(config['json']['rename'], 'r', encoding='utf-8') as f:
-    rename_data = json.loads(f.read())
-    equip_cat = rename_data['equip_cat']
-    equip_type = rename_data['equip_type']
-    equip_etc = rename_data['equip_etc']
 
 
-def gfl_core_doll(name: str, sid=0) -> (int, int):
-    """doll.json 에서 인형 id, 스킨 id 읽어오는 함수
+class GFLCore():
+    with open(config['json']['doll'], 'r', encoding="utf-8") as f:
+        core = json.loads(f.read())
+    with open(config['json']['rename'], 'r', encoding='utf-8') as f:
+        rename_data = json.loads(f.read())
+        equip_cat = rename_data['equip_cat']
+        equip_type = rename_data['equip_type']
+        equip_etc = rename_data['equip_etc']
 
-    Args:
-        name(str): 인형 이름
-        sid(int): 스킨 번호(1904 등등)
+    def __init__(self, name='', doll_id=0):
+        if name or doll_id:
+            for doll in GFLCore.core:
+                if doll["name"].lower() == name.lower():
+                    self.filtered = doll
+                    break
+                elif doll['id'] == doll_id:
+                    self.filtered = doll
+                    break
+                else:
+                    continue
 
-    Return:
-        doll_id(int): 인형 도감번호
-        doll_skin_num(int): 인형 스킨순번. 오류시 0 반환
-    """
-    # 아이디/스킨아이디 찾기, 현재 비교시 소문자 변환 과정을 거침
-    for doll in core:
-        if doll["name"].lower() == name.lower():
-            doll_id = doll["id"]
-            doll_skins = [int(n) for n in doll["skins"].keys()]
-            if sid in doll_skins:
-                return doll_id, doll_skins.index(sid) + 1
-            return doll_id, 0
-    else:
-        return None, None
+    def __getitem__(self, item):
+        return self.filtered[item]
 
-
-def gfl_core_doll_name(name: str) -> str:
-    """이름을 받아서 도감에 있는 이름을 반환하는 함수
-    
-    Args:
-        name(str): 인형 코드네임. 대소문자 구분 X
-    
-    Return:
-        name(str): DB 안에 있는 대소문자 구분된 이름
-    """
-    for doll in core:
-        if doll["name"].lower() == name.lower():
-            return doll["name"]
-    else:
-        return name
+    def skin_num(self, skin_id: int) -> int:
+        if self.filtered:
+            skins = [int(n) for n in self.filtered["skins"].keys()]
+            if skin_id in skins:
+                return skins.index(skin_id) + 1
+            else:
+                return 0
+        else:
+            return 0
 
 
 def path_rename(path: str, remove_name=False, remove_skin=True, original_name=True) -> str:
@@ -71,12 +60,12 @@ def path_rename(path: str, remove_name=False, remove_skin=True, original_name=Tr
     re_name = re.match("(.*?)(_[0-9]*)?$", ori_name)
     if re_name:
         name, skin = re_name.groups('')
-
+        core = GFLCore(name)
         if remove_name:
             pass
         else:
             if original_name:
-                name = gfl_core_doll_name(name)
+                name = core["name"]
             ret = ret + name
 
         if remove_skin or not skin:
@@ -96,16 +85,16 @@ class Equip():
     def __init__(self, equip_name: str, adv=True):
         self.name = equip_name
         self.flag = "N"
-        for i, j in equip_cat.items():
+        for i, j in GFLCore.equip_cat.items():
             if i in self.name:
                 self.name = self.name.replace(i, j)
                 break
-        for i, j in equip_type.items():
+        for i, j in GFLCore.equip_type.items():
             if i in self.name:
                 self.name = self.name.replace(i, j)
                 break
         if adv:
-            for i, j in equip_etc.items():
+            for i, j in GFLCore.equip_etc.items():
                 if i in self.name:
                     self.name = self.name.replace(i, j)
                     break
@@ -132,17 +121,21 @@ class Doll():
             remove_n(bool): _n flag를 지울지 말지 결정
         """
         self.ret = []
-        re_name = re.search("pic_(.+?)(_[0-9]+)?(_[NnMmDd])?(_alpha)?$", name)
+        self.rank = 1
+        re_name = re.search("pic_(.+?)(_[0-9]+)?(_[NnMmDd])?(_mod)?(_[Aa]lpha)?$", name)
         if re_name:
             # 정규표현식 이용, groups 메소드로 분할
-            doll_name, skin_id, flag, alpha = re_name.groups()
+            doll_name, skin_id, flag, mod, alpha = re_name.groups()
             skin_id = int(skin_id[1:]) if skin_id else 0
             # 기본(플래그 없음): S, 중상: D, 포트레이트: N
             self.flag = flag[-1].upper() if flag else "S"
 
             # 이름/스킨번호 변경
             if name_to_id or skin_id_to_num:
-                doll_id, skin_num = gfl_core_doll(doll_name, skin_id)
+                core = GFLCore(doll_name)
+                doll_id = core['id']
+                skin_num = core.skin_num(skin_id)
+                self.rank = core['rank']
 
                 # 이름 변경 여부 확인 후 self.ret 에 append
                 if doll_id and name_to_id:
@@ -177,6 +170,12 @@ class Doll():
                 pass
             elif flag:
                 self.ret.append(flag[-1].upper())
+
+            # 개장 + 포트레이트인 경우?
+            if mod:
+                core = GFLCore(doll_id=(20000 + doll_id))
+                self.rank = core['rank']
+                self.ret.append("mod")
 
             # 기존 파일명에 _alpha 있었으면 append
             if alpha:
