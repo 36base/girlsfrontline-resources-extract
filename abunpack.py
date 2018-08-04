@@ -14,6 +14,7 @@ config = configparser.ConfigParser()
 config.read("config.ini", encoding="utf-8")
 
 save_alpha_image = config.getboolean('abunpack', 'save_alpha_image')
+image_compression = config.getint('abunpack', 'image_compression')
 use_object_name = config.getboolean('abunpack', 'use_object_name')
 force_alpha_channel_remove = config.getboolean('abunpack', 'force_alpha_channel_remove')
 make_doll_icon = config.getboolean('abunpack', 'make_doll_icon')
@@ -122,7 +123,7 @@ class ResImage(Resource):
         else:
             return
 
-    def save(self, compression=5):
+    def save(self, compression=image_compression):
         path = os.path.join(self.path, f"{self.name}.{self.ext}")
         if "_Alpha" in self.name and not save_alpha_image:
             return
