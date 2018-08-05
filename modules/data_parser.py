@@ -29,7 +29,7 @@ def parser(url: str):
 class Info():
     def __init__(self):
         url_info = (
-            "https://raw.githubusercontent.com/36base/girlsfrontline-core/"
+            "https://raw.githubusercontent.com/36base/girlsfrontline-resources-extract/"
             "master/data/info.json"
         )
         try:
