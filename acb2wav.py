@@ -1,9 +1,12 @@
 import io
 import os
 import time
+import logging
 
 from modules import acb
 import hcapy
+
+logger = logging.getLogger("acb")
 
 
 def extract_acb(acb_file, target_dir):
@@ -16,7 +19,7 @@ def extract_acb(acb_file, target_dir):
 
     for track in cue.tracks:
         # cue_id, name, wav_id, enc_type, is_stream = track
-        print(track.name)
+        logger.info(track.name)
         name = "{0}{1}".format(track.name, ".wav")
         with open(os.path.join(target_dir, name), "wb") as named_out_file:
             hca_data = data_source.file_data_for_cue_id(track.wav_id)

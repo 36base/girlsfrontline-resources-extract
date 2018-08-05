@@ -4,6 +4,7 @@ import numpy as np
 import cv2
 import unitypack
 import configparser
+import logging
 
 import etcpy
 
@@ -29,6 +30,8 @@ rn_equip = config.getboolean("abunpack", "rename_equip")
 sp_remove_type_ext = config.getboolean("abunpack", "spine_remove_type_ext")
 sp_folder_skin_id_remove = config.getboolean("abunpack", "spine_folder_skin_id_remove")
 sp_folder_original_name = config.getboolean("abunpack", "spine_folder_original_name")
+
+logger = logging.getLogger("AssetBundle")
 
 
 class ImageResource():
@@ -279,7 +282,7 @@ class Asset():
             # split path
             path, name = os.path.split(cnt)
             name, ext = os.path.splitext(name)
-            print(f"{path}/{name}")
+            logger.info(f"{path}/{name}")
 
             if use_object_name:
                 name = res.obj_name
@@ -291,48 +294,48 @@ class Asset():
                 else:
                     res.table()
                     res.set_path("text/table", name)
-                print("\tText::table")
+                logger.info("-> Text::table")
 
             # Resources::Text::profilesconfig (인형 대사 등등)
             elif eq_path(path, "assets/resources/dabao/profilesconfig"):
                 res.profilesconfig(name)
                 res.set_path("text/profilesconfig", name)
-                print("\tText::profilesconfig")
+                logger.info("-> Text::profilesconfig")
 
             # Resources::Text::avgtxt (일반 전역 대사)
             elif eq_path(path, "assets/resources/dabao/avgtxt"):
                 res.set_path("text/avgtxt", name)
-                print("\tText::avgtxt")
+                logger.info("-> Text::avgtxt")
 
             # Resources::Text::avgtxt (전투중 전역 대사?)
             elif eq_path(path, "assets/resources/dabao/avgtxt/battleavg"):
                 res.set_path("text/avgtxt/battleavg", name)
-                print("\tText::avgtxt::battleavg")
+                logger.info("-> Text::avgtxt::battleavg")
 
             # Resources::Text::avgtxt (개조 스토리)
             elif eq_path(path, "assets/resources/dabao/avgtxt/memoir"):
                 res.set_path("text/avgtxt/memoir", name)
-                print("\tText::avgtxt::memoir")
+                logger.info("-> Text::avgtxt::memoir")
 
             # Resources::Text::avgtxt (스킨 스토리)
             elif eq_path(path, "assets/resources/dabao/avgtxt/skin"):
                 res.set_path("text/avgtxt/skin", name)
-                print("\tText::avgtxt::skin")
+                logger.info("-> Text::avgtxt::skin")
 
             # Resources::Text::avgtxt (튜토리얼?)
             elif eq_path(path, "assets/resources/dabao/avgtxt/startavg"):
                 res.set_path("text/avgtxt/startavg", name)
-                print("\tText::avgtxt::startavg")
+                logger.info("-> Text::avgtxt::startavg")
 
             # Resources::fairy (요정 대형)
             elif eq_path(path, "assets/resources/dabao/pics/fairy"):
                 res.set_path("fairy", name)
-                print("\tResources::fairy")
+                logger.info("-> Resources::fairy")
 
             # Resources::fairy::battle (요정 소형)
             elif eq_path(path, "assets/resources/dabao/pics/fairy/battle"):
                 res.set_path("fairy/battle", name)
-                print("\tResources::fairy::battle")
+                logger.info("-> Resources::fairy::battle")
 
             # Resources::icon::equip (장비 아이콘)
             elif eq_path(path, "assets/resources/dabao/pics/icons/equip"):
@@ -343,7 +346,7 @@ class Asset():
                     if rn.flag == 'E':
                         new_path = "icon/equip/dummy"
                 res.set_path(new_path, name)
-                print("\tResources::icon::equip")
+                logger.info("-> Resources::icon::equip")
 
             # Character::pic (인형 일러스트)
             elif eq_path(path, "assets/characters//pic"):
@@ -358,7 +361,7 @@ class Asset():
                     if rn.flag == 'N' and make_doll_icon:
                         res.make_icon(rn.rank, "icon/doll", name)
                 res.set_path(new_path, name)
-                print("\tCharacter::pic")
+                logger.info("-> Character::pic")
             elif eq_path(path, "assets/characters//pic_he"):
                 res.set_path("pic_he", name)
 
@@ -370,7 +373,7 @@ class Asset():
                 if sp_folder_skin_id_remove:
                     new_path = rename.path_rename(path, original_name=sp_folder_original_name)
                 res.set_path(f"spine/{new_path}", name)
-                print("\tCharacter::spine")
+                logger.info("-> Character::spine")
 
             # Sprites::skilicon (스킬 아이콘)
             elif eq_path(path, "assets/sprites/ui/icon/skillicon"):
@@ -378,11 +381,11 @@ class Asset():
                     # 알파 채널 이미지 강제 제거 여부에 따른 결과
                     res.remove_alpha_channel()
                 res.set_path("icon/skilicon", name)
-                print("\tSprites::skilicon")
+                logger.info("-> Sprites::skilicon")
 
             # 예외처리
             else:
-                print("\tPass")
+                logger.info("-> Pass")
                 continue
 
             # 저장
