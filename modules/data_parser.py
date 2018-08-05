@@ -3,7 +3,11 @@ import json
 
 
 class ParsingError(Exception):
-    pass
+    def __init__(self, msg="Data Parsing Error"):
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg
 
 
 def parser(url: str):
@@ -23,8 +27,9 @@ class Info():
         )
         try:
             self.info = json.loads(parser(url_info))
+            self.status = True
         except ParsingError:
-            pass
+            self.status = False
 
     def __getitem__(self, item):
         return self.info[item]

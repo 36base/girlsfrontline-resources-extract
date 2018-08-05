@@ -5,6 +5,7 @@ import configparser
 from modules import data_parser
 
 
+# 프로그램 위치와 실행 위치가 다르면 전자로 변경
 if os.getcwd() != os.path.split(sys.argv[0])[0]:
     os.chdir(os.path.split(sys.argv[0])[0])
 
@@ -15,7 +16,9 @@ info = data_parser.Info()
 if os.path.exists("config.ini"):
     config.read("config.ini", encoding="utf-8")
 else:
-    # 파일 없으면 다운로드
+    if not info.ststus:
+        raise data_parser.ParsingError("인터넷에 연결이 되어있지 않습니다")
+    # config.ini 파일이 없으면 다운로드
     info.dl("config.ini")
     config.read("config.ini", encoding="utf-8")
 
