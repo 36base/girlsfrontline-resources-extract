@@ -29,9 +29,8 @@ def parser(url: str):
 class Info():
     def __init__(self):
         url_info = (
-            "https://gist.githubusercontent.com/"
-            "krepe-suZette/b10999a58c3c8187b4bab0fd1c8a6a0c/raw/"
-            "195a216235ba274fa307cfb6d4390cdfd37a22d1/info.json"
+            "https://raw.githubusercontent.com/36base/girlsfrontline-core/"
+            "master/data/info.json"
         )
         try:
             self.info = json.loads(parser(url_info))
