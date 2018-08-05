@@ -11,6 +11,14 @@ class ParsingError(Exception):
 
 
 def parser(url: str):
+    """url 에서 텍스트 받아서 리턴
+
+    Args:
+        url(str): url (raw)
+
+    Return:
+        text(str): 인터넷에서 받은 텍스트
+    """
     resp = requests.get(url)
     if resp.status_code == 200:
         return resp.text

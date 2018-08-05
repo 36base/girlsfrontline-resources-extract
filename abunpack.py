@@ -42,6 +42,9 @@ class ImageResource():
 
 
 def make_container(assetbundle_data):
+    """Asset 인스턴스 받아서 id: container (파일의 경로) 로 저장
+    AssetStudio 에서 실제 이름 표시 옵션 키면 나오는 그 이름이 나옴
+    """
     container = {}
     get_list = ["TextAsset", "Texture2D"]
     data = assetbundle_data.read()["m_Container"]
@@ -53,6 +56,16 @@ def make_container(assetbundle_data):
 
 
 def eq_path(value1: str, value2: str) -> bool:
+    """경로 두가지를 받아서 비교. 반드시 / 만 사용.
+    패턴 사이에 빈공간이 있으면 모든 값이 있어도 되는것으로 판단
+
+    Args:
+        value1(str): 비교대상
+        value2(str): 패턴(즉 value1이 value2에 맞는지 순차적으로 실험)
+
+    Return:
+        ret(bool): 참/거짓
+    """
     # ori: 비교대상
     # con: 패턴
     ori = value1.split("/")
@@ -194,6 +207,11 @@ class ResBytes(Resource):
 
 class Asset():
     def __init__(self, asset):
+        """Unitypack 을 이용해 로드한 AssetBundle 내 개별 Asset 을 받아서 처리하는 클래스
+
+        Arg:
+            asset(unitypack.asset.Asset): Unitypack 으로 로드한 AssetBundle 중 asset
+        """
         self.asset = asset
         self.container = make_container(asset.objects[1])
 
@@ -219,54 +237,79 @@ class Asset():
         if obj.type == 'Texture2D':
             data = obj.read()
             if data.format.name == 'ETC_RGB4':
+                # 이미지 포맷: ETC1 -> RGB(A)
+                # Alpha 채널도 나오긴 하는데 의미 없어서 자름
                 im_r, im_g, im_b = cv2.split(np.fromstring(
                     etcpy.decode_etc1(data.data, data.width, data.height), np.uint8
                 ).reshape(data.width, data.height, 4))[:3]
+                # 알파 이미지 위치를 찾기 위한 변수.
+                # 예시: assets/character/m1918/pic/pic_m1918, png
                 im_a_dir, im_a_ext = self.container[path_id].split('.')
+                # 예시: assets/character/m1918/pic/pic_m1918_alpha.png
                 im_a_path = im_a_dir + "_alpha." + im_a_ext
+                # 위에서 만든 im_a_path 가 처음에 만든 파일 목록에 있는지 확인
                 if im_a_path in self.container.values():
+                    # 재귀적으로 알파 채널 이미지 찾아옴
                     im_a = self.get_resource(self.find_path_id(im_a_path)).image
+                    # 알파 채널 이미지가 원래 이미지와 크기가 다른 경우가 있는 경우를 위한 리사이징
                     if im_a.shape[:2] != (data.width, data.height):
                         im_a = cv2.resize(im_a, None, fx=2, fy=2)
                     return ResImage(cv2.merge((im_b, im_g, im_r, im_a)), data.name)
                 else:
                     return ResImage(cv2.merge((im_b, im_g, im_r)), data.name)
             elif data.format.name == 'RGBA32':
+                # 이미지 포맷: RGBA32 -> RGBA
                 im = np.fromstring(data.data, 'uint8').reshape(data.width, data.height, 4)
+                # cv2에서는 BGRA 색역을 쓰기 때문에 변한
                 im = cv2.cvtColor(im, cv2.COLOR_BGRA2RGBA)
+                # 소전은 뒤집힌거 쓰니까 이미지 뒤집기
                 im = cv2.flip(im, 0)
                 return ResImage(im, data.name)
             elif data.format.name == 'RGBA4444':
                 shape = (data.height, data.width)
+                # numpy array로 변환 (아직 1차원 배열)
                 im_array = np.fromstring(data.data, dtype=np.uint8)
+                # 비트 시프트 + 값 곱하기 후 3차원 배열로 만든 후 채널별로 분리
+                # 0x0 -> 0x00, 0x1 -> 0x11, ... , 0xF -> 0xFF
                 im_b, im_r = cv2.split((np.bitwise_and(im_array >> 4, 0x0f) * 17).reshape(*shape, 2))
                 im_a, im_g = cv2.split((np.bitwise_and(im_array, 0x0f) * 17).reshape(*shape, 2))
+                # 합쳐서 Return
                 return ResImage(cv2.flip(cv2.merge((im_b, im_g, im_r, im_a)), 0), data.name)
             elif data.format.name == 'ARGB32':
+                # 이미지 포맷: ARGB32 -> RGBA
+                # 채널별로 분리 후 다시 합침
+                # 이상하게 원래 크기 이상으로 뭔가 데이터가 있는데 딱히 필요는 없어서 모양으로 계산해서 필요한 부분만 슬라이싱
                 data_size = data.height * data.width * 4
                 im_array = np.fromstring(data.data[:data_size], dtype=np.uint8).reshape(data.height, data.width, 4)
                 im_a, im_r, im_g, im_b = cv2.split(cv2.flip(im_array, 0))
                 return ResImage(cv2.merge((im_b, im_g, im_r, im_a)), data.name)
             elif data.format.name == 'Alpha8':
+                # 알파 이미지
                 shape = (data.height, data.width)
                 return ResImage(cv2.flip(np.fromstring(data.data, "uint8").reshape(shape), 0), data.name)
             elif data.format.name == 'RGB24':
+                # 이미지 포맷: RGB24 -> RGB
+                # 간단하게 처리
                 data_size = data.height * data.width * 3
                 im_array = np.fromstring(data.data[:data_size], dtype=np.uint8).reshape(data.height, data.width, 3)
                 return ResImage(cv2.flip(cv2.cvtColor(im_array, cv2.COLOR_RGB2BGR), 0), data.name)
             else:
+                # 모르는 포맷은 그냥 건너뜀
                 return Resource(data.name)
         elif obj.type == 'TextAsset':
             data = obj.read()
             if isinstance(data.script, str):
+                # 데이터가 일반 텍스트(txt)인경우 str 로 리턴
                 return ResText(data.script, data.name)
             else:
+                # 아니면 Bytes 형태로 리턴
                 return ResBytes(data.bytes, data.name)
         else:
             return Resource()
 
     def save_original_resources(self):
-        """어셋번들 내 파일들을 그대로 저장
+        """어셋번들 내 파일들을 경로 그대로 저장.
+        모든 이미지와 텍스트류 파일을 저장하지만 특수 처리는 하지 않습니다.
         """
         for path_id, cnt in self.container.items():
             res = self.get_resource(path_id)
@@ -275,7 +318,7 @@ class Asset():
         return
 
     def save_processed_resources(self):
-        """36베이스용으로 처리된 리소스'만'저장
+        """리소스를 처리한 후 저장. 모든 옵션(이름 바꾸기 등) 사용 가능
         """
         for path_id, cnt in self.container.items():
             res = self.get_resource(path_id)
