@@ -64,7 +64,7 @@ def path_rename(path: str, remove_name=False, remove_skin=True, original_name=Tr
         if remove_name:
             pass
         else:
-            if original_name:
+            if original_name and core.filtered:
                 name = core["name"]
             ret = ret + name
 
