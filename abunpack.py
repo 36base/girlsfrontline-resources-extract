@@ -12,7 +12,10 @@ from modules import rename
 
 
 config = configparser.ConfigParser()
-config.read("config.ini", encoding="utf-8")
+try:
+    config.read("config.ini", encoding="utf-8")
+except configparser.MissingSectionHeaderError:
+    config.read("config.ini", encoding="utf-8-sig")
 
 save_alpha_image = config.getboolean('abunpack', 'save_alpha_image')
 image_compression = config.getint('abunpack', 'image_compression')

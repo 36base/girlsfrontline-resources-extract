@@ -14,7 +14,10 @@ info = data_parser.Info()
 
 # config.ini 파일 확인 & 읽기
 if os.path.exists("config.ini"):
-    config.read("config.ini", encoding="utf-8")
+    try:
+        config.read("config.ini", encoding="utf-8")
+    except configparser.MissingSectionHeaderError:
+        config.read("config.ini", encoding="utf-8-sig")
 else:
     # 인터넷 연결이 되어있지 않았던 경우 오류 발생
     if not info.ststus:
