@@ -52,6 +52,10 @@ import io
 import math
 import sys
 from collections import namedtuple as T
+import logging
+
+
+logger = logging.getLogger("acb_py")
 
 COLUMN_STORAGE_MASK = 0xF0
 COLUMN_STORAGE_PERROW = 0x50
@@ -351,12 +355,12 @@ class AFSArchive(object):
         version = buf.bytes(4)
         file_count = buf.le_uint32_t()
         self.alignment = buf.le_uint32_t()
-        print("afs2:", file_count, "files in ar")
-        print("afs2: aligned to", self.alignment, "bytes")
+        logger.info("afs2:", file_count, "files in ar")
+        logger.info("afs2: aligned to", self.alignment, "bytes")
 
         self.offset_size = version[1]
         self.offset_mask = int("FF" * self.offset_size, 16)
-        print("afs2: a file offset is", self.offset_size, "bytes")
+        logger.info("afs2: a file offset is", self.offset_size, "bytes")
 
         self.files = []
         self.create_file_entries(buf, file_count)
