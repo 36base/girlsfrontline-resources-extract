@@ -1,6 +1,6 @@
 {
   "version":"1",
   "config.ini":"https://raw.githubusercontent.com/36base/girlsfrontline-resources-extract/master/config.ini",
-  "data/doll.json":"https://raw.githubusercontent.com/36base/girlsfrontline-core/master/data/doll.json",
+  "data/doll.json":"https://unpkg.com/girlsfrontline-core/data/doll.json",
   "data/rename.json":"https://raw.githubusercontent.com/36base/girlsfrontline-resources-extract/master/data/rename.json"
 }
