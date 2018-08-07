@@ -239,6 +239,9 @@ class Asset():
         obj = self.asset.objects[path_id]
         if obj.type == 'Texture2D':
             data = obj.read()
+            if len(data.data) == 0:
+                logger.warning("Data doesn't exist")
+                return Resource()
             if data.format.name == 'ETC_RGB4':
                 # 이미지 포맷: ETC1 -> RGB(A)
                 # Alpha 채널도 나오긴 하는데 의미 없어서 자름
@@ -324,11 +327,12 @@ class Asset():
         """리소스를 처리한 후 저장. 모든 옵션(이름 바꾸기 등) 사용 가능
         """
         for path_id, cnt in self.container.items():
-            res = self.get_resource(path_id)
             # split path
             path, name = os.path.split(cnt)
             name, ext = os.path.splitext(name)
             logger.info(f"{path}/{name}")
+            # resource get
+            res = self.get_resource(path_id)
 
             if use_object_name:
                 name = res.obj_name

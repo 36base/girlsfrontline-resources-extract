@@ -45,7 +45,7 @@ def main(file_list: list):
 
         # AssetBunle 파일 (*.ab) 인 경우
         if re_ab.match(file_dir):
-            logger.info(f"=== AssetBundle File: {os.path.split(file_dir)[1]} ===")
+            logger.info(f"\n=== AssetBundle File: {os.path.split(file_dir)[1]} ===")
             abunpack.abunpack(file_dir)
         # ACB 파일 (*.acb.bytes) 인 경우
         elif re_acb.match(file_dir):
