@@ -355,12 +355,12 @@ class AFSArchive(object):
         version = buf.bytes(4)
         file_count = buf.le_uint32_t()
         self.alignment = buf.le_uint32_t()
-        logger.info("afs2:", file_count, "files in ar")
-        logger.info("afs2: aligned to", self.alignment, "bytes")
+        logger.info("afs2: {0} files in ar".format(file_count))
+        logger.info("afs2: aligned to {0} bytes".format(self.alignment))
 
         self.offset_size = version[1]
         self.offset_mask = int("FF" * self.offset_size, 16)
-        logger.info("afs2: a file offset is", self.offset_size, "bytes")
+        logger.info("afs2: a file offset is {0} bytes".format(self.offset_size))
 
         self.files = []
         self.create_file_entries(buf, file_count)
