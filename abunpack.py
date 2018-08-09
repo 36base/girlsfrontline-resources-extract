@@ -265,7 +265,7 @@ class Asset():
                     return ResImage(cv2.merge((im_b, im_g, im_r)), data.name)
             elif data.format.name == 'RGBA32':
                 # 이미지 포맷: RGBA32 -> RGBA
-                im = np.fromstring(data.data, 'uint8').reshape(data.width, data.height, 4)
+                im = np.fromstring(data.data, 'uint8').reshape(data.height, data.width, 4)
                 # cv2에서는 BGRA 색역을 쓰기 때문에 변한
                 im = cv2.cvtColor(im, cv2.COLOR_BGRA2RGBA)
                 # 소전은 뒤집힌거 쓰니까 이미지 뒤집기
@@ -457,5 +457,5 @@ def abunpack(file_dir: str):
 if __name__ == "__main__":
     # abunpack("character_m1014.ab")
     # abunpack("dist/sprites_ui.ab")
-    abunpack("dist/character_theresa.ab")
+    abunpack("dist/resource_squads.ab")
     print("stop")
