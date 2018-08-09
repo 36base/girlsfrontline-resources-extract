@@ -27,6 +27,7 @@ rn_doll = config.getboolean("abunpack", "rename_doll")
 rn_doll_id = config.getboolean('abunpack', 'rename_doll_id')
 rn_doll_skin_id = config.getboolean('abunpack', 'rename_doll_skin_id')
 rn_remove_n = config.getboolean('abunpack', 'rename_remove_n')
+split_dummy_image_folder = config.getboolean('abunpack', 'split_dummy_image_folder')
 
 rn_equip = config.getboolean("abunpack", "rename_equip")
 
@@ -372,6 +373,11 @@ class Asset():
                 res.set_path("text/avgtxt/skin", name)
                 logger.info("-> Text::avgtxt::skin")
 
+            # Resources::Text::avglang (스토리 언어별 텍스트)
+            elif eq_path(path, "assets/resources/dabao/avglanguage"):
+                res.set_path("text/avglang", name)
+                logger.info("-> Text::avglang")
+
             # Resources::Text::avgtxt (튜토리얼?)
             elif eq_path(path, "assets/resources/dabao/avgtxt/startavg"):
                 res.set_path("text/avgtxt/startavg", name)
@@ -391,24 +397,36 @@ class Asset():
             elif eq_path(path, "assets/resources/dabao/pics/icons/equip"):
                 new_path = "icon/equip"
                 if rn_equip:
+                    # 장비 이름 변경
                     rn = rename.Equip(name)
                     name = rn.get_name()
+                    # 이름 변경 오류시(한자 포함 등등) 더미폴더로 이동
                     if rn.flag == 'E':
                         new_path = "icon/equip/dummy"
                 res.set_path(new_path, name)
                 logger.info("-> Resources::icon::equip")
 
+            # Resources::pic::squads (지원소대)
+            elif eq_path(path, "assets/resources/dabao/pics/squads"):
+                res.set_path("res/pic/squads", name)
+                logger.info("-> Resources::pic::squads")
+
             # Character::pic (인형 일러스트)
             elif eq_path(path, "assets/characters//pic"):
                 new_path = "pic"
+                char_name = path.split('/')[2]
                 if rn_doll:
+                    # 인형 이름 바꾸기 + 옵션 전달
                     rn = rename.Doll(name, rn_doll_id, rn_doll_skin_id, rn_remove_n)
                     name = rn.get_name()
                     if rn.flag == 'E':
-                        new_path = "pic/dummy"
+                        # Flag가 E(오류)면 더미 폴더 이동. 필요에 따라 인형별 폴더 분리
+                        new_path = f"pic/dummy/{char_name}" if split_dummy_image_folder else "pic/dummy"
                     if rn.flag == 'N' and rn_remove_n:
+                        # 옵션에 따라 _N이 붙은 이미지들의 _N을 지우고 별도 폴더 이동
                         new_path = "pic/portraits"
                     if rn.flag == 'N' and make_doll_icon:
+                        # 옵션값 참이면 _N 이미지 기반으로 아이콘 생섣
                         res.make_icon(rn.rank, "icon/doll", name)
                 res.set_path(new_path, name)
                 logger.info("-> Character::pic")
@@ -419,8 +437,10 @@ class Asset():
             elif eq_path(path, "assets/characters//spine"):
                 new_path = path.split('/')[2]
                 if sp_remove_type_ext and res.ext in ["bytes", "txt"]:
+                    # 필요없는 확장자 제거 옵션
                     res.ext = ""
                 if sp_folder_skin_id_remove:
+                    # 폴더 이름에 (찾을 수 있으면) 대문자 포함된 이름 사용
                     new_path = rename.path_rename(path, original_name=sp_folder_original_name)
                 res.set_path(f"spine/{new_path}", name)
                 logger.info("-> Character::spine")
