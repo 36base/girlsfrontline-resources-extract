@@ -264,6 +264,11 @@ class Asset():
                     return ResImage(cv2.merge((im_b, im_g, im_r, im_a)), data.name)
                 else:
                     return ResImage(cv2.merge((im_b, im_g, im_r)), data.name)
+            elif data.format.name == "ETC2_RGBA8":
+                im = cv2.cvtColor(np.fromstring(
+                    etcpy.decode_etc2a8(data.data, data.width, data.height), np.uint8
+                ).reshape(data.width, data.height, 4), cv2.COLOR_BGR2RGBA)
+                return ResImage(im, data.name)
             elif data.format.name == 'RGBA32':
                 # 이미지 포맷: RGBA32 -> RGBA
                 im = np.fromstring(data.data, 'uint8').reshape(data.height, data.width, 4)
