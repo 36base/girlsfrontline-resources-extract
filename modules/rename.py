@@ -98,7 +98,7 @@ class Equip():
                 if i in self.name:
                     self.name = self.name.replace(i, j)
                     break
-        if re.search('[^a-z0-9/_.-]+[._]', self.name):
+        if re.search('[^a-z0-9/_.-]+$', self.name):
             self.flag = "E"
 
     def get_name(self) -> str:
