@@ -2,18 +2,30 @@ import io
 import os
 import time
 import logging
+import configparser
 
 from modules import acb
 import hcapy
 
+
+config = configparser.ConfigParser()
+try:
+    config.read("config.ini", encoding="utf-8")
+except configparser.MissingSectionHeaderError:
+    config.read("config.ini", encoding="utf-8-sig")
+
 logger = logging.getLogger("acb")
+save_wav = config.getboolean("acb2wav", "save_wav")
 
 
 def save(file_name, data_source, cue_id, decoder):
-    with open(file_name, "wb") as named_out_file:
-        hca_data = data_source.file_data_for_cue_id(cue_id)
-        wav_data = decoder.decode(hca_data).read()
-        named_out_file.write(wav_data)
+    ext = ".wav" if save_wav else ".hca"
+    with open(file_name + ext, "wb") as named_out_file:
+        sound_data = data_source.file_data_for_cue_id(cue_id)
+        if save_wav:
+            # HCA -> WAV 인코딩
+            sound_data = decoder.decode(sound_data).read()
+        named_out_file.write(sound_data)
 
 
 def extract_acb(acb_file, target_dir):
@@ -29,14 +41,13 @@ def extract_acb(acb_file, target_dir):
         for file_ent in data_source.files:
             cue_id = file_ent.cue_id
             logger.info("{0}_{1}".format(target_dir.split("/")[-1], cue_id))
-            name = "{0}_{1}{2}".format(target_dir.split("/")[-1], cue_id, ".wav")
+            name = "{0}_{1}".format(target_dir.split("/")[-1], cue_id)
             save(os.path.join(target_dir, name), data_source, cue_id, d)
     else:
         for track in cue.tracks:
             # cue_id, name, wav_id, enc_type, is_stream = track
             logger.info(track.name)
-            name = "{0}{1}".format(track.name, ".wav")
-            save(os.path.join(target_dir, name), data_source, track.wav_id, d)
+            save(os.path.join(target_dir, track.name), data_source, track.wav_id, d)
 
 
 def acb2wav(file_dir: str):
