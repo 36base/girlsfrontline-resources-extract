@@ -169,7 +169,7 @@ class ResText(Resource):
             if not line:
                 continue
             n, m = line.split(",", 1)
-            table[n] = m.replace("//c", ",")
+            table[n] = m.replace("//c", ",").replace("//n", "\n")
         self.data = json.dumps(table, indent=2, ensure_ascii=False)
         self.ext = "json"
 
