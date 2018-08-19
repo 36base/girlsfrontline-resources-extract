@@ -175,7 +175,7 @@ class ResText(Resource):
 
     def profilesconfig(self, mode="default"):
         ret = {}
-        if mode in ["charactervoice", "newcharactervoice"]:
+        if mode.lower() in ["charactervoice", "newcharactervoice"]:
             for line in self.text.splitlines():
                 if line[:2] == "//":
                     continue
@@ -183,7 +183,7 @@ class ResText(Resource):
                 char_voice.replace("\\n", "\n")
                 char_voice_type = char_voice_type.lower()
                 ret[doll_name] = dict(ret.get(doll_name, {}), **{char_voice_type: char_voice.split('<>')})
-        elif mode == "kalinalevelvoice":
+        elif mode.lower() == "kalinalevelvoice":
             for line in self.text.splitlines():
                 if line[:2] == "//":
                     continue
@@ -482,5 +482,5 @@ def abunpack(file_dir: str):
 if __name__ == "__main__":
     # abunpack("character_m1014.ab")
     # abunpack("dist/sprites_ui.ab")
-    abunpack("dist/resource_squads.ab")
+    abunpack("dist/asset_textes.ab")
     print("stop")
