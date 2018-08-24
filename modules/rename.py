@@ -34,7 +34,7 @@ class GFLCore():
 
     def skin_num(self, skin_id: int) -> int:
         if self.filtered:
-            skins = [int(n) for n in self.filtered["skins"].keys()]
+            skins = [int(n) for n in self.filtered.get("skins", {}).keys()]
             if skin_id in skins:
                 return skins.index(skin_id) + 1
             else:
