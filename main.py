@@ -3,6 +3,7 @@ import re
 import os
 import sys
 import logging
+import glob
 
 import change_dir
 
@@ -36,24 +37,30 @@ def main(file_list: list):
 
     # 추출 시작 메시지
     logger.info(f"Start Extracting : {time.strftime('%Y-%m-%d %I:%M:%S')}")
+    # 지원가능한 파일인지 정규표현식으로 판단하기 위한 정규식 컴파일
+    re_ab = re.compile(".+[.]ab")
+    re_acb = re.compile(".+[.]acb[.]bytes")
 
     # 받은 파일 목록으로 반복 구문 실행
     for file_dir in file_list[1:]:
-        # 지원가능한 파일인지 정규표현식으로 판단하기 위한 정규식 컴파일
-        re_ab = re.compile(".+[.]ab")
-        re_acb = re.compile(".+[.]acb[.]bytes")
-
-        # AssetBunle 파일 (*.ab) 인 경우
-        if re_ab.match(file_dir):
-            logger.info(f"\n=== AssetBundle File: {os.path.split(file_dir)[1]} ===")
-            abunpack.abunpack(file_dir)
-        # ACB 파일 (*.acb.bytes) 인 경우
-        elif re_acb.match(file_dir):
-            logger.info(f"=== ACB File: {os.path.split(file_dir)[1]} ===")
-            acb2wav.acb2wav(file_dir)
-        # 둘다 아닌 경우 로거에 경고 반환
+        # 폴더를 넣으면 폴더 내 ab, acb.bytes 파일들을 추출
+        if os.path.isdir(file_dir):
+            file_dirs = glob.glob(f"{file_dir}/*.ab") + glob.glob(f"{file_dir}/*.acb.bytes")
         else:
-            logger.warning(f"=== Unknown file: {os.path.split(file_dir)[1]}===")
+            file_dirs = [file_dir]
+
+        for fd in file_dirs:
+            # AssetBunle 파일 (*.ab) 인 경우
+            if re_ab.match(fd):
+                logger.info(f"\n=== AssetBundle File: {os.path.split(fd)[1]} ===")
+                abunpack.abunpack(fd)
+            # ACB 파일 (*.acb.bytes) 인 경우
+            elif re_acb.match(fd):
+                logger.info(f"=== ACB File: {os.path.split(fd)[1]} ===")
+                acb2wav.acb2wav(fd)
+            # 둘다 아닌 경우 로거에 경고 반환
+            else:
+                logger.warning(f"=== Unknown file: {os.path.split(fd)[1]}===")
     else:
         # 반복문 종료 이후
         logger.info(f"Finish Extracting : {time.strftime('%Y-%m-%d %I:%M:%S')}\n\n")
