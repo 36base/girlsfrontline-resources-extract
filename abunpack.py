@@ -168,6 +168,8 @@ class ResText(Resource):
         for line in self.text.splitlines():
             if not line:
                 continue
+            if ',' not in line:
+                line = line + ","
             n, m = line.split(",", 1)
             table[n] = m.replace("//c", ",").replace("//n", "\n")
         self.data = json.dumps(table, indent=2, ensure_ascii=False)
