@@ -12,6 +12,7 @@ from modules import rename
 
 
 config = configparser.ConfigParser()
+cf_dir = json.load(open("config_dir.json", "r", encoding="utf-8"))
 try:
     config.read("config.ini", encoding="utf-8")
 except configparser.MissingSectionHeaderError:
