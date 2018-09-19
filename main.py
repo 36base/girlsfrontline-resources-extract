@@ -4,6 +4,7 @@ import os
 import sys
 import logging
 import glob
+import argparse
 
 import change_dir
 
@@ -11,7 +12,15 @@ import abunpack
 import acb2wav
 
 
-def main(file_list: list):
+def main():
+    # argparse 설정
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument("-o", "--output_dir", help="Master output dir", type=str)
+    arg_parser.add_argument("target", help="*.ab or *.acb.bytes file or folder's path", type=str, nargs="+")
+    args = arg_parser.parse_args()
+    output_dir = args.output_dir
+    file_list = args.target
+
     # Logging 모듈 설정
     logger = logging.getLogger("")
     logger.setLevel(logging.INFO)
@@ -30,11 +39,6 @@ def main(file_list: list):
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 
-    # sys.argv 로 받은 파일 목록이 1(자기 자신) 이면 오류처리
-    if len(file_list) == 1:
-        logger.error("가공할 파일을 실행파일에 드래그 & 드롭하거나, 커맨드창에서 순서대로 입력해주세요.")
-        return
-
     # 추출 시작 메시지
     logger.info(f"Start Extracting : {time.strftime('%Y-%m-%d %I:%M:%S')}")
     # 지원가능한 파일인지 정규표현식으로 판단하기 위한 정규식 컴파일
@@ -42,7 +46,7 @@ def main(file_list: list):
     re_acb = re.compile(".+[.]acb[.]bytes")
 
     # 받은 파일 목록으로 반복 구문 실행
-    for file_dir in file_list[1:]:
+    for file_dir in file_list:
         # 폴더를 넣으면 폴더 내 ab, acb.bytes 파일들을 추출
         if os.path.isdir(file_dir):
             file_dirs = glob.glob(f"{file_dir}/*.ab") + glob.glob(f"{file_dir}/*.acb.bytes")
@@ -71,8 +75,8 @@ if __name__ == "__main__":
     # 시간측정용
     start_time = time.time()
 
-    # 메인 함수, 인자로 파일 목록 전달
-    main(sys.argv)
+    # 메인 함수
+    main()
 
     # 시간측정 종료
     print("=== 소모시간 : %s초 ===" % (time.time() - start_time))
