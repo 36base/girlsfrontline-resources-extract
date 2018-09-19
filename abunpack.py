@@ -101,10 +101,10 @@ class Resource:
         self.path = path
         self.name = name
 
-    def save(self):
+    def save(self, output_dir):
         if self.data is None:
             return
-        path = os.path.join(self.path, f"{self.name}.{self.ext}")
+        path = os.path.join(output_dir, self.path, f"{self.name}.{self.ext}")
         os.makedirs(self.path, exist_ok=True)
         mode = {'mode': 'w', 'encoding': 'utf-8'} if self.type == 'text' else {'mode': 'wb'}
         with open(path, **mode) as f:
@@ -144,8 +144,8 @@ class ResImage(Resource):
         else:
             return
 
-    def save(self, compression=image_compression):
-        path = os.path.join(self.path, f"{self.name}.{self.ext}")
+    def save(self, compression=image_compression, output_dir):
+        path = os.path.join(output_dir, self.path, f"{self.name}.{self.ext}")
         if "_Alpha" in self.name and not save_alpha_image:
             return
         os.makedirs(self.path, exist_ok=True)
@@ -320,17 +320,17 @@ class Asset():
         else:
             return Resource()
 
-    def save_original_resources(self):
+    def save_original_resources(self, output_dir):
         """어셋번들 내 파일들을 경로 그대로 저장.
         모든 이미지와 텍스트류 파일을 저장하지만 특수 처리는 하지 않습니다.
         """
         for path_id, cnt in self.container.items():
             res = self.get_resource(path_id)
             res.set_path(*os.path.split(cnt))
-            res.save()
+            res.save(output_dir)
         return
 
-    def save_processed_resources(self):
+    def save_processed_resources(self, output_dir):
         """리소스를 처리한 후 저장. 모든 옵션(이름 바꾸기 등) 사용 가능
         """
         for path_id, cnt in self.container.items():
@@ -465,18 +465,18 @@ class Asset():
                 continue
 
             # 저장
-            res.save()
+            res.save(output_dir)
 
 
-def abunpack(file_dir: str):
+def abunpack(file_dir: str, output_dir: str):
     f = open(file_dir, "rb")
     bundle = unitypack.load(f)
     for asset in bundle.assets:
         a = Asset(asset)
         if config['abunpack']['extract_mode'] == "processed":
-            a.save_processed_resources()
+            a.save_processed_resources(output_dir)
         else:
-            a.save_original_resources()
+            a.save_original_resources(output_dir)
     return
 
 
