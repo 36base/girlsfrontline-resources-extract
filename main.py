@@ -15,7 +15,7 @@ import acb2wav
 def main():
     # argparse 설정
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument("-o", "--output_dir", help="Master output dir", type=str)
+    arg_parser.add_argument("-o", "--output_dir", help="Master output dir", type=str, default="./")
     arg_parser.add_argument("target", help="*.ab or *.acb.bytes file or folder's path", type=str, nargs="+")
     args = arg_parser.parse_args()
     output_dir = args.output_dir
@@ -57,11 +57,11 @@ def main():
             # AssetBunle 파일 (*.ab) 인 경우
             if re_ab.match(fd):
                 logger.info(f"\n=== AssetBundle File: {os.path.split(fd)[1]} ===")
-                abunpack.abunpack(fd)
+                abunpack.abunpack(fd, output_dir)
             # ACB 파일 (*.acb.bytes) 인 경우
             elif re_acb.match(fd):
                 logger.info(f"=== ACB File: {os.path.split(fd)[1]} ===")
-                acb2wav.acb2wav(fd)
+                acb2wav.acb2wav(fd, output_dir)
             # 둘다 아닌 경우 로거에 경고 반환
             else:
                 logger.warning(f"=== Unknown file: {os.path.split(fd)[1]}===")
