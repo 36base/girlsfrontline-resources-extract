@@ -50,10 +50,10 @@ def extract_acb(acb_file, target_dir):
             save(os.path.join(target_dir, track.name), data_source, track.wav_id, d)
 
 
-def acb2wav(file_dir: str):
+def acb2wav(file_dir: str, output_dir: str):
     with open(file_dir, "rb") as f:
         file_name = os.path.split(file_dir)[1].split('.')[0]
-        extract_acb(f, f"wav/{file_name}")
+        extract_acb(f, os.path.join(output_dir, f"wav/{file_name}"))
 
 
 if __name__ == "__main__":
