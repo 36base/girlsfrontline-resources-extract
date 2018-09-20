@@ -14,6 +14,7 @@ PR은 언제나 환영합니다. 주석도 많이 달았습니다. 주로 만드
 * numpy
 * opencv-python
 * configparser
+* requests
 * [unitypack](https://github.com/HearthSim/UnityPack)
 * [hcapy](https://github.com/krepe-suZette/hcapy)
 * [etcpy](https://github.com/krepe-suZette/etcpy)
@@ -25,6 +26,7 @@ PR은 언제나 환영합니다. 주석도 많이 달았습니다. 주로 만드
 - [x] acb 파일 처리 기능 구현
 - [x] 아이콘 만들기 기능
 - [x] 로깅
+- [ ] 코드를 건드리지 않는 파일 출력 경로 변경 기능
 - [ ] GitHub Wiki 에 설명 깔끔하게 올리기
 
 ## Wiki
