@@ -105,6 +105,7 @@ class Resource:
         if self.data is None:
             return
         path = os.path.join(output_dir, self.path, f"{self.name}.{self.ext}")
+        logger.info(f"-> {self.path}")
         os.makedirs(self.path, exist_ok=True)
         mode = {'mode': 'w', 'encoding': 'utf-8'} if self.type == 'text' else {'mode': 'wb'}
         with open(path, **mode) as f:
@@ -145,7 +146,10 @@ class ResImage(Resource):
             return
 
     def save(self, compression=image_compression, output_dir):
+        if self.data is None:
+            return
         path = os.path.join(output_dir, self.path, f"{self.name}.{self.ext}")
+        logger.info(f"-> {self.path}")
         if "_Alpha" in self.name and not save_alpha_image:
             return
         os.makedirs(self.path, exist_ok=True)
@@ -351,18 +355,15 @@ class Asset():
                 else:
                     res.table()
                     res.set_path("text/table", name)
-                logger.info("-> Text::table")
 
             # Resources::Text::profilesconfig (인형 대사 등등)
             elif eq_path(path, "assets/resources/dabao/profilesconfig"):
                 res.profilesconfig(name)
                 res.set_path("text/profilesconfig", name)
-                logger.info("-> Text::profilesconfig")
 
             # Resources::Text::avgtxt (일반 전역 대사)
             elif eq_path(path, "assets/resources/dabao/avgtxt"):
                 res.set_path("text/avgtxt", name)
-                logger.info("-> Text::avgtxt")
 
             # Resources::Text::avgtxt (전투중 전역 대사?)
             elif eq_path(path, "assets/resources/dabao/avgtxt/battleavg"):
@@ -372,32 +373,26 @@ class Asset():
             # Resources::Text::avgtxt (개조 스토리)
             elif eq_path(path, "assets/resources/dabao/avgtxt/memoir"):
                 res.set_path("text/avgtxt/memoir", name)
-                logger.info("-> Text::avgtxt::memoir")
 
             # Resources::Text::avgtxt (스킨 스토리)
             elif eq_path(path, "assets/resources/dabao/avgtxt/skin"):
                 res.set_path("text/avgtxt/skin", name)
-                logger.info("-> Text::avgtxt::skin")
 
             # Resources::Text::avglang (스토리 언어별 텍스트)
             elif eq_path(path, "assets/resources/dabao/avglanguage"):
                 res.set_path("text/avglang", name)
-                logger.info("-> Text::avglang")
 
             # Resources::Text::avgtxt (튜토리얼?)
             elif eq_path(path, "assets/resources/dabao/avgtxt/startavg"):
                 res.set_path("text/avgtxt/startavg", name)
-                logger.info("-> Text::avgtxt::startavg")
 
             # Resources::fairy (요정 대형)
             elif eq_path(path, "assets/resources/dabao/pics/fairy"):
                 res.set_path("fairy", name)
-                logger.info("-> Resources::fairy")
 
             # Resources::fairy::battle (요정 소형)
             elif eq_path(path, "assets/resources/dabao/pics/fairy/battle"):
                 res.set_path("fairy/battle", name)
-                logger.info("-> Resources::fairy::battle")
 
             # Resources::icon::equip (장비 아이콘)
             elif eq_path(path, "assets/resources/dabao/pics/icons/equip"):
@@ -410,12 +405,10 @@ class Asset():
                     if rn.flag == 'E':
                         new_path = "icon/equip/dummy"
                 res.set_path(new_path, name)
-                logger.info("-> Resources::icon::equip")
 
             # Resources::pic::squads (지원소대)
             elif eq_path(path, "assets/resources/dabao/pics/squads"):
                 res.set_path("res/pic/squads", name)
-                logger.info("-> Resources::pic::squads")
 
             # Character::pic (인형 일러스트)
             elif eq_path(path, "assets/characters//pic"):
@@ -435,7 +428,6 @@ class Asset():
                         # 옵션값 참이면 _N 이미지 기반으로 아이콘 생섣
                         res.make_icon(rn.rank, "icon/doll", name)
                 res.set_path(new_path, name)
-                logger.info("-> Character::pic")
             elif eq_path(path, "assets/characters//pic_he"):
                 res.set_path("pic_he", name)
 
@@ -449,7 +441,6 @@ class Asset():
                     # 폴더 이름에 (찾을 수 있으면) 대문자 포함된 이름 사용
                     new_path = rename.path_rename(path, original_name=sp_folder_original_name)
                 res.set_path(f"spine/{new_path}", name)
-                logger.info("-> Character::spine")
 
             # Sprites::skilicon (스킬 아이콘)
             elif eq_path(path, "assets/sprites/ui/icon/skillicon"):
@@ -457,7 +448,6 @@ class Asset():
                     # 알파 채널 이미지 강제 제거 여부에 따른 결과
                     res.remove_alpha_channel()
                 res.set_path("icon/skilicon", name)
-                logger.info("-> Sprites::skilicon")
 
             # 예외처리
             else:
