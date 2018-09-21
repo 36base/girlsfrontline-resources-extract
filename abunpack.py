@@ -410,10 +410,18 @@ class Asset():
                     res.remove_alpha_channel()
                 res.set_path(cf_dir["assets/sprites/ui/icon/skillicon"], name)
 
-            # 예외처리
             else:
-                logger.info("-> Pass")
-                continue
+                # 기타 단순 저장 목록들
+                for n, m in cf_dir["_extra"].items():
+                    if eq_path(path, n):
+                        res.set_path(m, name)
+                        break
+                    else:
+                        continue
+                # 예외처리
+                else:
+                    logger.info("-> Pass")
+                    continue
 
             # 저장
             res.save(output_dir)
