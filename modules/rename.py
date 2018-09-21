@@ -7,6 +7,9 @@ import configparser
 config = configparser.ConfigParser()
 config.read("config.ini", encoding="utf-8")
 
+core_version = config.getfloat("main", "core_version")
+name_key = "name" if core_version < 2 else "codename"
+
 
 class GFLCore():
     with open(config['json']['doll'], 'r', encoding="utf-8") as f:
@@ -17,10 +20,10 @@ class GFLCore():
         equip_type = rename_data['equip_type']
         equip_etc = rename_data['equip_etc']
 
-    def __init__(self, name='', doll_id=0):
-        if name or doll_id:
+    def __init__(self, codename='', doll_id=0):
+        if codename or doll_id:
             for doll in GFLCore.core:
-                if doll["name"].lower() == name.lower():
+                if doll[name_key].lower() == codename.lower():
                     self.filtered = doll
                     break
                 elif doll['id'] == doll_id:
@@ -34,7 +37,10 @@ class GFLCore():
 
     def skin_num(self, skin_id: int) -> int:
         if self.filtered:
-            skins = [int(n) for n in self.filtered.get("skins", {}).keys()]
+            if core_version < 2:
+                skins = [int(n) for n in self.filtered.get("skins", {}).keys()]
+            else:
+                skins = [int(n) for n in self.filtered.get("skins", [])]
             if skin_id in skins:
                 return skins.index(skin_id) + 1
             else:
@@ -65,7 +71,7 @@ def path_rename(path: str, remove_name=False, remove_skin=True, original_name=Tr
             pass
         else:
             if original_name and core.filtered:
-                name = core["name"]
+                name = core[name_key]
             ret = ret + name
 
         if remove_skin or not skin:

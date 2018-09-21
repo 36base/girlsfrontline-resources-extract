@@ -12,6 +12,7 @@ from modules import rename
 
 
 config = configparser.ConfigParser()
+cf_dir = json.load(open("config_dir.json", "r", encoding="utf-8"))
 try:
     config.read("config.ini", encoding="utf-8")
 except configparser.MissingSectionHeaderError:
@@ -61,7 +62,7 @@ def make_container(assetbundle_data):
 
 def eq_path(value1: str, value2: str) -> bool:
     """경로 두가지를 받아서 비교. 반드시 / 만 사용.
-    패턴 사이에 빈공간이 있으면 모든 값이 있어도 되는것으로 판단
+    패턴 사이에 빈공간이 있거나 *이 있으면 모든 값이 있어도 되는것으로 판단
 
     Args:
         value1(str): 비교대상
@@ -77,7 +78,7 @@ def eq_path(value1: str, value2: str) -> bool:
     if len(ori) != len(con):
         return False
     for n, i in enumerate(con):
-        if i == "":
+        if i in {"", "*"}:
             continue
         elif i != ori[n]:
             return False
@@ -100,11 +101,12 @@ class Resource:
         self.path = path
         self.name = name
 
-    def save(self):
+    def save(self, output_dir):
         if self.data is None:
             return
-        path = os.path.join(self.path, f"{self.name}.{self.ext}")
-        os.makedirs(self.path, exist_ok=True)
+        path = os.path.join(output_dir, self.path, f"{self.name}.{self.ext}")
+        logger.info(f"-> {self.path}")
+        os.makedirs(os.path.split(path)[0], exist_ok=True)
         mode = {'mode': 'w', 'encoding': 'utf-8'} if self.type == 'text' else {'mode': 'wb'}
         with open(path, **mode) as f:
             f.write(self.data)
@@ -124,7 +126,7 @@ class ResImage(Resource):
         else:
             pass
 
-    def make_icon(self, rank, path, name):
+    def make_icon(self, rank, name, path, output_dir):
         if self.shape == (512, 512, 3):
             if rank == 2:
                 data = ImageResource.icon_rate2[:, :, :]
@@ -139,15 +141,16 @@ class ResImage(Resource):
             data[31:227, 31:227, :3] = self.image[16:212, 31:227]
             icon = ResImage(data)
             icon.set_path(path, name)
-            icon.save()
+            icon.save(output_dir)
         else:
             return
 
-    def save(self, compression=image_compression):
-        path = os.path.join(self.path, f"{self.name}.{self.ext}")
+    def save(self, output_dir, compression=image_compression):
+        path = os.path.join(output_dir, self.path, f"{self.name}.{self.ext}")
+        logger.info(f"-> {self.path}")
         if "_Alpha" in self.name and not save_alpha_image:
             return
-        os.makedirs(self.path, exist_ok=True)
+        os.makedirs(os.path.split(path)[0], exist_ok=True)
         if len(self.shape) == 2:
             self.image = cv2.merge(((self.image, ) * 3))
         self.data = cv2.imencode('.png', self.image, [16, 5])[1]
@@ -321,17 +324,17 @@ class Asset():
         else:
             return Resource()
 
-    def save_original_resources(self):
+    def save_original_resources(self, output_dir):
         """어셋번들 내 파일들을 경로 그대로 저장.
         모든 이미지와 텍스트류 파일을 저장하지만 특수 처리는 하지 않습니다.
         """
         for path_id, cnt in self.container.items():
             res = self.get_resource(path_id)
             res.set_path(*os.path.split(cnt))
-            res.save()
+            res.save(output_dir)
         return
 
-    def save_processed_resources(self):
+    def save_processed_resources(self, output_dir):
         """리소스를 처리한 후 저장. 모든 옵션(이름 바꾸기 등) 사용 가능
         """
         for path_id, cnt in self.container.items():
@@ -351,76 +354,28 @@ class Asset():
                     res.set_path("text/table", "tableconfig")
                 else:
                     res.table()
-                    res.set_path("text/table", name)
-                logger.info("-> Text::table")
+                    res.set_path(cf_dir["assets/resources/dabao/table"], name)
 
             # Resources::Text::profilesconfig (인형 대사 등등)
             elif eq_path(path, "assets/resources/dabao/profilesconfig"):
                 res.profilesconfig(name)
-                res.set_path("text/profilesconfig", name)
-                logger.info("-> Text::profilesconfig")
-
-            # Resources::Text::avgtxt (일반 전역 대사)
-            elif eq_path(path, "assets/resources/dabao/avgtxt"):
-                res.set_path("text/avgtxt", name)
-                logger.info("-> Text::avgtxt")
-
-            # Resources::Text::avgtxt (전투중 전역 대사?)
-            elif eq_path(path, "assets/resources/dabao/avgtxt/battleavg"):
-                res.set_path("text/avgtxt/battleavg", name)
-                logger.info("-> Text::avgtxt::battleavg")
-
-            # Resources::Text::avgtxt (개조 스토리)
-            elif eq_path(path, "assets/resources/dabao/avgtxt/memoir"):
-                res.set_path("text/avgtxt/memoir", name)
-                logger.info("-> Text::avgtxt::memoir")
-
-            # Resources::Text::avgtxt (스킨 스토리)
-            elif eq_path(path, "assets/resources/dabao/avgtxt/skin"):
-                res.set_path("text/avgtxt/skin", name)
-                logger.info("-> Text::avgtxt::skin")
-
-            # Resources::Text::avglang (스토리 언어별 텍스트)
-            elif eq_path(path, "assets/resources/dabao/avglanguage"):
-                res.set_path("text/avglang", name)
-                logger.info("-> Text::avglang")
-
-            # Resources::Text::avgtxt (튜토리얼?)
-            elif eq_path(path, "assets/resources/dabao/avgtxt/startavg"):
-                res.set_path("text/avgtxt/startavg", name)
-                logger.info("-> Text::avgtxt::startavg")
-
-            # Resources::fairy (요정 대형)
-            elif eq_path(path, "assets/resources/dabao/pics/fairy"):
-                res.set_path("fairy", name)
-                logger.info("-> Resources::fairy")
-
-            # Resources::fairy::battle (요정 소형)
-            elif eq_path(path, "assets/resources/dabao/pics/fairy/battle"):
-                res.set_path("fairy/battle", name)
-                logger.info("-> Resources::fairy::battle")
+                res.set_path(cf_dir["assets/resources/dabao/profilesconfig"], name)
 
             # Resources::icon::equip (장비 아이콘)
             elif eq_path(path, "assets/resources/dabao/pics/icons/equip"):
-                new_path = "icon/equip"
+                new_path = cf_dir["assets/resources/dabao/pics/icons/equip"]
                 if rn_equip:
                     # 장비 이름 변경
                     rn = rename.Equip(name)
                     name = rn.get_name()
                     # 이름 변경 오류시(한자 포함 등등) 더미폴더로 이동
                     if rn.flag == 'E':
-                        new_path = "icon/equip/dummy"
+                        new_path = os.path.join(new_path, "dummy")
                 res.set_path(new_path, name)
-                logger.info("-> Resources::icon::equip")
-
-            # Resources::pic::squads (지원소대)
-            elif eq_path(path, "assets/resources/dabao/pics/squads"):
-                res.set_path("res/pic/squads", name)
-                logger.info("-> Resources::pic::squads")
 
             # Character::pic (인형 일러스트)
             elif eq_path(path, "assets/characters//pic"):
-                new_path = "pic"
+                new_path = cf_dir["assets/characters//pic"]
                 char_name = path.split('/')[2]
                 if rn_doll:
                     # 인형 이름 바꾸기 + 옵션 전달
@@ -434,11 +389,10 @@ class Asset():
                         new_path = "pic/portraits"
                     if rn.flag == 'N' and make_doll_icon:
                         # 옵션값 참이면 _N 이미지 기반으로 아이콘 생섣
-                        res.make_icon(rn.rank, "icon/doll", name)
+                        res.make_icon(rn.rank, name, cf_dir["_etc"]["characters/pic/icon"], output_dir)
                 res.set_path(new_path, name)
-                logger.info("-> Character::pic")
             elif eq_path(path, "assets/characters//pic_he"):
-                res.set_path("pic_he", name)
+                res.set_path(cf_dir["assets/sprites/ui/icon/skillicon"], name)
 
             # Character::spine (인형 SD)
             elif eq_path(path, "assets/characters//spine"):
@@ -449,40 +403,53 @@ class Asset():
                 if sp_folder_skin_id_remove:
                     # 폴더 이름에 (찾을 수 있으면) 대문자 포함된 이름 사용
                     new_path = rename.path_rename(path, original_name=sp_folder_original_name)
-                res.set_path(f"spine/{new_path}", name)
-                logger.info("-> Character::spine")
+                res.set_path(f"{cf_dir['assets/characters//spine']}/{new_path}", name)
 
             # Sprites::skilicon (스킬 아이콘)
             elif eq_path(path, "assets/sprites/ui/icon/skillicon"):
                 if force_alpha_channel_remove and isinstance(res, ResImage):
                     # 알파 채널 이미지 강제 제거 여부에 따른 결과
                     res.remove_alpha_channel()
-                res.set_path("icon/skilicon", name)
-                logger.info("-> Sprites::skilicon")
+                res.set_path(cf_dir["assets/sprites/ui/icon/skillicon"], name)
 
-            # 예외처리
             else:
-                logger.info("-> Pass")
-                continue
+                # 기타 단순 저장 목록들
+                for n, m in cf_dir["_extra"].items():
+                    if eq_path(path, n):
+                        res.set_path(m, name)
+                        break
+                    else:
+                        continue
+                # 예외처리
+                else:
+                    logger.info("-> Pass")
+                    continue
 
             # 저장
-            res.save()
+            res.save(output_dir)
 
 
-def abunpack(file_dir: str):
+def abunpack(file_dir: str, output_dir: str):
     f = open(file_dir, "rb")
     bundle = unitypack.load(f)
     for asset in bundle.assets:
         a = Asset(asset)
         if config['abunpack']['extract_mode'] == "processed":
-            a.save_processed_resources()
+            a.save_processed_resources(output_dir)
         else:
-            a.save_original_resources()
+            a.save_original_resources(output_dir)
     return
 
 
 if __name__ == "__main__":
-    # abunpack("character_m1014.ab")
-    # abunpack("dist/sprites_ui.ab")
-    abunpack("dist/asset_textes.ab")
-    print("stop")
+    import argparse
+    logger.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(levelname)s | %(message)s')
+    stream_hander = logging.StreamHandler()
+    stream_hander.setFormatter(formatter)
+    logger.addHandler(stream_hander)
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument("-o", "--output_dir", help="Master output dir", type=str, default="./")
+    arg_parser.add_argument("target", help="*.ab file's path", type=str)
+    args = arg_parser.parse_args()
+    abunpack(args.target, args.output_dir)

@@ -1,0 +1,23 @@
+{
+  "assets/resources/dabao/table": "text/table",
+  "assets/resources/dabao/profilesconfig": "text/profilesconfig",
+  "assets/resources/dabao/pics/icons/equip": "icon/equip",
+  "assets/characters//pic": "pic",
+  "assets/characters//pic_he": "pic",
+  "assets/characters//spine": "spine",
+  "assets/sprites/ui/icon/skillicon": "icon/skillicon",
+  "_extra":{
+    "assets/resources/dabao/pics/fairy": "fairy",
+    "assets/resources/dabao/pics/fairy/battle": "fairy/battle",
+    "assets/resources/dabao/avgtxt": "text/avgtxt",
+    "assets/resources/dabao/avgtxt/battleavg": "text/avgtxt/battleavg",
+    "assets/resources/dabao/avgtxt/memoir": "text/avgtxt/memoir",
+    "assets/resources/dabao/avgtxt/skin": "text/avgtxt/skin",
+    "assets/resources/dabao/avglanguage": "text/avglang",
+    "assets/resources/dabao/avgtxt/startavg": "text/avgtxt/startavg",
+    "assets/resources/dabao/pics/squads": "res/squad"
+  },
+  "_etc": {
+    "characters/pic/icon": "icon/characters"
+  }
+}
