@@ -5,7 +5,10 @@ import configparser
 
 
 config = configparser.ConfigParser()
-config.read("config.ini", encoding="utf-8")
+try:
+    config.read("config.ini", encoding="utf-8")
+except configparser.MissingSectionHeaderError:
+    config.read("config.ini", encoding="utf-8-sig")
 
 core_version = config.getfloat("main", "core_version")
 name_key = "name" if core_version < 2 else "codename"
