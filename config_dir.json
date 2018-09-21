@@ -16,5 +16,8 @@
     "assets/resources/dabao/avglanguage": "text/avglang",
     "assets/resources/dabao/avgtxt/startavg": "text/avgtxt/startavg",
     "assets/resources/dabao/pics/squads": "res/squad"
+  },
+  "_etc": {
+    "characters/pic/icon": "icon/characters"
   }
 }

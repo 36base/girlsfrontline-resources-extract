@@ -106,7 +106,7 @@ class Resource:
             return
         path = os.path.join(output_dir, self.path, f"{self.name}.{self.ext}")
         logger.info(f"-> {self.path}")
-        os.makedirs(self.path, exist_ok=True)
+        os.makedirs(os.path.split(path)[0], exist_ok=True)
         mode = {'mode': 'w', 'encoding': 'utf-8'} if self.type == 'text' else {'mode': 'wb'}
         with open(path, **mode) as f:
             f.write(self.data)
@@ -126,7 +126,7 @@ class ResImage(Resource):
         else:
             pass
 
-    def make_icon(self, rank, path, name):
+    def make_icon(self, rank, name, path, output_dir):
         if self.shape == (512, 512, 3):
             if rank == 2:
                 data = ImageResource.icon_rate2[:, :, :]
@@ -141,18 +141,16 @@ class ResImage(Resource):
             data[31:227, 31:227, :3] = self.image[16:212, 31:227]
             icon = ResImage(data)
             icon.set_path(path, name)
-            icon.save()
+            icon.save(output_dir)
         else:
             return
 
-    def save(self, compression=image_compression, output_dir):
-        if self.data is None:
-            return
+    def save(self, output_dir, compression=image_compression):
         path = os.path.join(output_dir, self.path, f"{self.name}.{self.ext}")
         logger.info(f"-> {self.path}")
         if "_Alpha" in self.name and not save_alpha_image:
             return
-        os.makedirs(self.path, exist_ok=True)
+        os.makedirs(os.path.split(path)[0], exist_ok=True)
         if len(self.shape) == 2:
             self.image = cv2.merge(((self.image, ) * 3))
         self.data = cv2.imencode('.png', self.image, [16, 5])[1]
@@ -389,7 +387,7 @@ class Asset():
                         new_path = "pic/portraits"
                     if rn.flag == 'N' and make_doll_icon:
                         # 옵션값 참이면 _N 이미지 기반으로 아이콘 생섣
-                        res.make_icon(rn.rank, "icon/doll", name)
+                        res.make_icon(rn.rank, name, cf_dir["_etc"]["characters/pic/icon"], output_dir)
                 res.set_path(new_path, name)
             elif eq_path(path, "assets/characters//pic_he"):
                 res.set_path(cf_dir["assets/sprites/ui/icon/skillicon"], name)
@@ -403,7 +401,7 @@ class Asset():
                 if sp_folder_skin_id_remove:
                     # 폴더 이름에 (찾을 수 있으면) 대문자 포함된 이름 사용
                     new_path = rename.path_rename(path, original_name=sp_folder_original_name)
-                res.set_path(f"{cf_dir["assets/characters//spine"]}/{new_path}", name)
+                res.set_path(f"{cf_dir['assets/characters//spine']}/{new_path}", name)
 
             # Sprites::skilicon (스킬 아이콘)
             elif eq_path(path, "assets/sprites/ui/icon/skillicon"):
@@ -435,6 +433,11 @@ def abunpack(file_dir: str, output_dir: str):
 
 if __name__ == "__main__":
     import argparse
+    logger.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(levelname)s | %(message)s')
+    stream_hander = logging.StreamHandler()
+    stream_hander.setFormatter(formatter)
+    logger.addHandler(stream_hander)
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("-o", "--output_dir", help="Master output dir", type=str, default="./")
     arg_parser.add_argument("target", help="*.ab file's path", type=str)
