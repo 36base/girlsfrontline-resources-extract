@@ -62,7 +62,7 @@ def make_container(assetbundle_data):
 
 def eq_path(value1: str, value2: str) -> bool:
     """경로 두가지를 받아서 비교. 반드시 / 만 사용.
-    패턴 사이에 빈공간이 있으면 모든 값이 있어도 되는것으로 판단
+    패턴 사이에 빈공간이 있거나 *이 있으면 모든 값이 있어도 되는것으로 판단
 
     Args:
         value1(str): 비교대상
@@ -78,7 +78,7 @@ def eq_path(value1: str, value2: str) -> bool:
     if len(ori) != len(con):
         return False
     for n, i in enumerate(con):
-        if i == "":
+        if i in {"", "*"}:
             continue
         elif i != ori[n]:
             return False
@@ -354,65 +354,28 @@ class Asset():
                     res.set_path("text/table", "tableconfig")
                 else:
                     res.table()
-                    res.set_path("text/table", name)
+                    res.set_path(cf_dir["assets/resources/dabao/table"], name)
 
             # Resources::Text::profilesconfig (인형 대사 등등)
             elif eq_path(path, "assets/resources/dabao/profilesconfig"):
                 res.profilesconfig(name)
-                res.set_path("text/profilesconfig", name)
-
-            # Resources::Text::avgtxt (일반 전역 대사)
-            elif eq_path(path, "assets/resources/dabao/avgtxt"):
-                res.set_path("text/avgtxt", name)
-
-            # Resources::Text::avgtxt (전투중 전역 대사?)
-            elif eq_path(path, "assets/resources/dabao/avgtxt/battleavg"):
-                res.set_path("text/avgtxt/battleavg", name)
-                logger.info("-> Text::avgtxt::battleavg")
-
-            # Resources::Text::avgtxt (개조 스토리)
-            elif eq_path(path, "assets/resources/dabao/avgtxt/memoir"):
-                res.set_path("text/avgtxt/memoir", name)
-
-            # Resources::Text::avgtxt (스킨 스토리)
-            elif eq_path(path, "assets/resources/dabao/avgtxt/skin"):
-                res.set_path("text/avgtxt/skin", name)
-
-            # Resources::Text::avglang (스토리 언어별 텍스트)
-            elif eq_path(path, "assets/resources/dabao/avglanguage"):
-                res.set_path("text/avglang", name)
-
-            # Resources::Text::avgtxt (튜토리얼?)
-            elif eq_path(path, "assets/resources/dabao/avgtxt/startavg"):
-                res.set_path("text/avgtxt/startavg", name)
-
-            # Resources::fairy (요정 대형)
-            elif eq_path(path, "assets/resources/dabao/pics/fairy"):
-                res.set_path("fairy", name)
-
-            # Resources::fairy::battle (요정 소형)
-            elif eq_path(path, "assets/resources/dabao/pics/fairy/battle"):
-                res.set_path("fairy/battle", name)
+                res.set_path(cf_dir["assets/resources/dabao/profilesconfig"], name)
 
             # Resources::icon::equip (장비 아이콘)
             elif eq_path(path, "assets/resources/dabao/pics/icons/equip"):
-                new_path = "icon/equip"
+                new_path = cf_dir["assets/resources/dabao/pics/icons/equip"]
                 if rn_equip:
                     # 장비 이름 변경
                     rn = rename.Equip(name)
                     name = rn.get_name()
                     # 이름 변경 오류시(한자 포함 등등) 더미폴더로 이동
                     if rn.flag == 'E':
-                        new_path = "icon/equip/dummy"
+                        new_path = os.path.join(new_path, "dummy")
                 res.set_path(new_path, name)
-
-            # Resources::pic::squads (지원소대)
-            elif eq_path(path, "assets/resources/dabao/pics/squads"):
-                res.set_path("res/pic/squads", name)
 
             # Character::pic (인형 일러스트)
             elif eq_path(path, "assets/characters//pic"):
-                new_path = "pic"
+                new_path = cf_dir["assets/characters//pic"]
                 char_name = path.split('/')[2]
                 if rn_doll:
                     # 인형 이름 바꾸기 + 옵션 전달
@@ -429,7 +392,7 @@ class Asset():
                         res.make_icon(rn.rank, "icon/doll", name)
                 res.set_path(new_path, name)
             elif eq_path(path, "assets/characters//pic_he"):
-                res.set_path("pic_he", name)
+                res.set_path(cf_dir["assets/sprites/ui/icon/skillicon"], name)
 
             # Character::spine (인형 SD)
             elif eq_path(path, "assets/characters//spine"):
@@ -440,14 +403,14 @@ class Asset():
                 if sp_folder_skin_id_remove:
                     # 폴더 이름에 (찾을 수 있으면) 대문자 포함된 이름 사용
                     new_path = rename.path_rename(path, original_name=sp_folder_original_name)
-                res.set_path(f"spine/{new_path}", name)
+                res.set_path(f"{cf_dir["assets/characters//spine"]}/{new_path}", name)
 
             # Sprites::skilicon (스킬 아이콘)
             elif eq_path(path, "assets/sprites/ui/icon/skillicon"):
                 if force_alpha_channel_remove and isinstance(res, ResImage):
                     # 알파 채널 이미지 강제 제거 여부에 따른 결과
                     res.remove_alpha_channel()
-                res.set_path("icon/skilicon", name)
+                res.set_path(cf_dir["assets/sprites/ui/icon/skillicon"], name)
 
             # 예외처리
             else:
@@ -471,7 +434,4 @@ def abunpack(file_dir: str, output_dir: str):
 
 
 if __name__ == "__main__":
-    # abunpack("character_m1014.ab")
-    # abunpack("dist/sprites_ui.ab")
-    abunpack("dist/asset_textes.ab")
     print("stop")
