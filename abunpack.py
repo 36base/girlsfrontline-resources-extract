@@ -434,4 +434,9 @@ def abunpack(file_dir: str, output_dir: str):
 
 
 if __name__ == "__main__":
-    print("stop")
+    import argparse
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument("-o", "--output_dir", help="Master output dir", type=str, default="./")
+    arg_parser.add_argument("target", help="*.ab file's path", type=str)
+    args = arg_parser.parse_args()
+    abunpack(args.target, args.output_dir)
