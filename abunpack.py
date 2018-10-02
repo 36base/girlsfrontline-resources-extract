@@ -30,6 +30,8 @@ rn_doll_skin_id = config.getboolean('abunpack', 'rename_doll_skin_id')
 rn_remove_n = config.getboolean('abunpack', 'rename_remove_n')
 split_dummy_image_folder = config.getboolean('abunpack', 'split_dummy_image_folder')
 
+name_normalize = config.getboolean('abunpack', 'name_normalize')
+
 rn_equip = config.getboolean("abunpack", "rename_equip")
 
 sp_remove_type_ext = config.getboolean("abunpack", "spine_remove_type_ext")
@@ -390,6 +392,8 @@ class Asset():
                     if rn.flag == 'N' and make_doll_icon:
                         # 옵션값 참이면 _N 이미지 기반으로 아이콘 생섣
                         res.make_icon(rn.rank, name, cf_dir["_etc"]["characters/pic/icon"], output_dir)
+                elif name_normalize:
+                    name = rename.normalize(name)
                 res.set_path(new_path, name)
             elif eq_path(path, "assets/characters//pic_he"):
                 res.set_path(cf_dir["assets/sprites/ui/icon/skillicon"], name)

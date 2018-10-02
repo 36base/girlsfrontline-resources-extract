@@ -84,6 +84,17 @@ def path_rename(path: str, remove_name=False, remove_skin=True, original_name=Tr
     return ret
 
 
+def normalize(name: str) -> str:
+    """일러 이름 정규화
+
+    Arg:
+        name(str): 일러 이름. 경로와 확장자 없어야함
+    Return:
+        name(str): 깔끔하게 바뀐 일러이름.
+    """
+    return re.sub("^Pic_", "pic_", name)
+
+
 class Equip():
     """중국어로 되어있는 장비이름을 한국어로 대응-변환
 
