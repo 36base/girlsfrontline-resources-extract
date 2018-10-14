@@ -186,8 +186,13 @@ class ResText(Resource):
             for line in self.text.splitlines():
                 if line[:2] == "//":
                     continue
-                doll_name, char_voice_type, char_voice = line.split("|")
-                char_voice.replace("\\n", "\n")
+                try:
+                    doll_name, char_voice_type, char_voice = line.split("|", 2)
+                except ValueError:
+                    logger.warning(f"Exception caused on file \"{mode}\", skip this line: \"{line}\"")
+                    continue
+
+                char_voice = char_voice.replace("\\n", "\n")
                 char_voice_type = char_voice_type.lower()
                 ret[doll_name] = dict(ret.get(doll_name, {}), **{char_voice_type: char_voice.split('<>')})
         elif mode.lower() == "kalinalevelvoice":
