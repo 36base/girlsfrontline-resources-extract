@@ -15,6 +15,7 @@ except configparser.MissingSectionHeaderError:
 
 logger = logging.getLogger("acb")
 save_wav = config.getboolean("acb2wav", "save_wav")
+wav_file_name_format = config.get("acb2wav", "wav_file_name_format")
 
 
 def save(file_name, data_source, cue_id, decoder):
@@ -46,7 +47,7 @@ def extract_acb(acb_file, target_dir):
         for track in cue.tracks:
             # cue_id, name, wav_id, enc_type, is_stream = track
             logger.info(track.name)
-            save(os.path.join(target_dir, track.name), data_source, track.wav_id, d)
+            save(os.path.join(target_dir, wav_file_name_format.format(**track._asdict())), data_source, track.wav_id, d)
 
 
 def acb2wav(file_dir: str, output_dir: str):
