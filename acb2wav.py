@@ -1,6 +1,5 @@
 import io
 import os
-import time
 import logging
 import configparser
 
@@ -57,6 +56,15 @@ def acb2wav(file_dir: str, output_dir: str):
 
 
 if __name__ == "__main__":
-    start_time = time.time()
-    acb2wav("9A91.acb.bytes")
-    print("--- %s seconds ---" % (time.time() - start_time))
+    import argparse
+
+    logger.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(levelname)s | %(message)s')
+    stream_hander = logging.StreamHandler()
+    stream_hander.setFormatter(formatter)
+    logger.addHandler(stream_hander)
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument("-o", "--output_dir", help="Master output dir", type=str, default="./")
+    arg_parser.add_argument("target", help="*.acb.bytes file's path", type=str)
+    args = arg_parser.parse_args()
+    acb2wav(args.target, args.output_dir)
