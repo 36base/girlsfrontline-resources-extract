@@ -6,7 +6,7 @@ import unitypack
 import configparser
 import logging
 
-import etcpy
+import pyetc
 
 from modules import rename
 
@@ -259,7 +259,7 @@ class Asset():
                 # 이미지 포맷: ETC1 -> RGB(A)
                 # Alpha 채널도 나오긴 하는데 의미 없어서 자름
                 im_r, im_g, im_b = cv2.split(np.fromstring(
-                    etcpy.decode_etc1(data.data, data.width, data.height), np.uint8
+                    pyetc.decode_etc1(data.data, data.width, data.height), np.uint8
                 ).reshape(data.height, data.width, 4))[:3]
                 # 알파 이미지 위치를 찾기 위한 변수.
                 # 예시: assets/character/m1918/pic/pic_m1918, png
@@ -278,7 +278,7 @@ class Asset():
                     return ResImage(cv2.merge((im_b, im_g, im_r)), data.name)
             elif data.format.name == "ETC2_RGBA8":
                 im = cv2.cvtColor(np.fromstring(
-                    etcpy.decode_etc2a8(data.data, data.width, data.height), np.uint8
+                    pyetc.decode_etc2a8(data.data, data.width, data.height), np.uint8
                 ).reshape(data.height, data.width, 4), cv2.COLOR_BGR2RGBA)
                 return ResImage(im, data.name)
             elif data.format.name == 'RGBA32':
