@@ -105,13 +105,14 @@ class Resource:
 
     def save(self, output_dir):
         if self.data is None:
+            logger.info(f"-> Pass")
             return
         path = os.path.join(output_dir, self.path, f"{self.name}.{self.ext}")
-        logger.info(f"-> {self.path}")
         os.makedirs(os.path.split(path)[0], exist_ok=True)
         mode = {'mode': 'w', 'encoding': 'utf-8'} if self.type == 'text' else {'mode': 'wb'}
         with open(path, **mode) as f:
             f.write(self.data)
+        logger.info(f"-> {self.path}/{self.name}.{self.ext}")
 
 
 class ResImage(Resource):
@@ -136,7 +137,7 @@ class ResImage(Resource):
                 data = ImageResource.icon_rate3[:, :, :]
             elif rank == 4:
                 data = ImageResource.icon_rate4[:, :, :]
-            elif rank == 5:
+            elif rank == 5 or rank == 7:
                 data = ImageResource.icon_rate5[:, :, :]
             else:
                 return
@@ -147,17 +148,15 @@ class ResImage(Resource):
         else:
             return
 
-    def save(self, output_dir, compression=image_compression):
-        path = os.path.join(output_dir, self.path, f"{self.name}.{self.ext}")
-        logger.info(f"-> {self.path}")
-        if "_Alpha" in self.name and not save_alpha_image:
-            return
-        os.makedirs(os.path.split(path)[0], exist_ok=True)
-        if len(self.shape) == 2:
-            self.image = cv2.merge(((self.image, ) * 3))
-        self.data = cv2.imencode('.png', self.image, [16, 5])[1]
-        with open(path, 'wb') as f:
-            f.write(self.data)
+    def save(self, output_dir):
+        if len(self.shape) == 2:    # 채널이 1개인 이미지인 경우(= Alpha8 이미지)
+            if save_alpha_image:    # config.ini 에서 save_alpha_image 옵션 사용시
+                self.image = cv2.merge(((self.image, ) * 3))
+            else:                   # 사용 안하면 건너뛰고 None 을 리턴
+                logger.info("-> Pass")
+                return
+        self.data = cv2.imencode('.png', self.image, [16, image_compression])[1]
+        super().save(output_dir)
 
 
 class ResText(Resource):
@@ -348,7 +347,7 @@ class Asset():
             # split path
             path, name = os.path.split(cnt)
             name, ext = os.path.splitext(name)
-            logger.info(f"{path}/{name}")
+            logger.info(f"{path}/{name}{ext}")
             # resource get
             res = self.get_resource(path_id)
 
