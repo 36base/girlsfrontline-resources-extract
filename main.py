@@ -1,7 +1,6 @@
 import time
 import re
 import os
-import sys
 import logging
 import glob
 import argparse
@@ -10,6 +9,9 @@ import change_dir
 
 import abunpack
 import acb2wav
+
+
+__version__ = "2.2.1"
 
 
 def main():
@@ -40,7 +42,8 @@ def main():
         logger.addHandler(file_handler)
 
     # 추출 시작 메시지
-    logger.info(f"Start Extracting : {time.strftime('%Y-%m-%d %I:%M:%S')}")
+    logger.info(f"girlsfrontline-resources-extractor: {__version__}")
+    logger.info(f"Start Extracting: {time.strftime('%Y-%m-%d %I:%M:%S')}")
     # 지원가능한 파일인지 정규표현식으로 판단하기 위한 정규식 컴파일
     re_ab = re.compile(".+[.]ab")
     re_acb = re.compile(".+[.]acb[.]bytes")
