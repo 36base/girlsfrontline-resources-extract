@@ -105,14 +105,14 @@ class Resource:
 
     def save(self, output_dir):
         if self.data is None:
-            logger.info(f"-> Pass")
+            logger.info(f"-> Pass(No data)")
             return
         path = os.path.join(output_dir, self.path, f"{self.name}.{self.ext}")
         os.makedirs(os.path.split(path)[0], exist_ok=True)
         mode = {'mode': 'w', 'encoding': 'utf-8'} if self.type == 'text' else {'mode': 'wb'}
         with open(path, **mode) as f:
             f.write(self.data)
-        logger.info(f"-> {self.path}/{self.name}.{self.ext}")
+        logger.info(f"-> {self.path}/{self.name}{'.' + self.ext if self.ext else ''}")
 
 
 class ResImage(Resource):
@@ -153,7 +153,7 @@ class ResImage(Resource):
             if save_alpha_image:    # config.ini 에서 save_alpha_image 옵션 사용시
                 self.image = cv2.merge(((self.image, ) * 3))
             else:                   # 사용 안하면 건너뛰고 None 을 리턴
-                logger.info("-> Pass")
+                logger.info("-> Pass(Skip alpha image)")
                 return
         self.data = cv2.imencode('.png', self.image, [16, image_compression])[1]
         super().save(output_dir)
@@ -430,7 +430,7 @@ class Asset():
                         continue
                 # 예외처리
                 else:
-                    logger.info("-> Pass")
+                    logger.info("-> Pass(file not in config_dir list)")
                     continue
 
             # 저장

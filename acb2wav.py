@@ -18,14 +18,17 @@ save_wav = config.getboolean("acb2wav", "save_wav")
 wav_file_name_format = config.get("acb2wav", "wav_file_name_format")
 
 
-def save(file_name, data_source, cue_id, decoder):
+def save(target_dir, file_name, data_source, cue_id, decoder):
     ext = ".wav" if save_wav else ".hca"
-    with open(file_name + ext, "wb") as named_out_file:
+    path = os.path.join(target_dir, file_name) + ext
+    with open(path, "wb") as named_out_file:
         sound_data = data_source.file_data_for_cue_id(cue_id)
         if save_wav:
             # HCA -> WAV 인코딩
             sound_data = decoder.decode(sound_data).read()
         named_out_file.write(sound_data)
+        logger.info(f"-> {file_name}{ext}")
+    return
 
 
 def extract_acb(acb_file, target_dir):
@@ -40,14 +43,12 @@ def extract_acb(acb_file, target_dir):
         logger.warning("Cannot find all cue info")
         for file_ent in data_source.files:
             cue_id = file_ent.cue_id
-            logger.info("{0}_{1}".format(target_dir.split("/")[-1], cue_id))
             name = "{0}_{1}".format(target_dir.split("/")[-1], cue_id)
-            save(os.path.join(target_dir, name), data_source, cue_id, d)
+            save(target_dir, name, data_source, cue_id, d)
     else:
         for track in cue.tracks:
             # cue_id, name, wav_id, enc_type, is_stream = track
-            logger.info(track.name)
-            save(os.path.join(target_dir, wav_file_name_format.format(**track._asdict())), data_source, track.wav_id, d)
+            save(target_dir, wav_file_name_format.format(**track._asdict()), data_source, track.wav_id, d)
 
 
 def acb2wav(file_dir: str, output_dir: str):
