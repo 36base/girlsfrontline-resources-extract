@@ -14,6 +14,7 @@ except configparser.MissingSectionHeaderError:
     config.read("config.ini", encoding="utf-8-sig")
 
 logger = logging.getLogger("acb")
+override = config.getboolean("main", "override")
 save_wav = config.getboolean("acb2wav", "save_wav")
 wav_file_name_format = config.get("acb2wav", "wav_file_name_format")
 
@@ -21,6 +22,9 @@ wav_file_name_format = config.get("acb2wav", "wav_file_name_format")
 def save(target_dir, file_name, data_source, cue_id, decoder):
     ext = ".wav" if save_wav else ".hca"
     path = os.path.join(target_dir, file_name) + ext
+    if not override and os.path.isfile(path):
+        logger.info("-> Pass(File already exists)")
+        return
     with open(path, "wb") as named_out_file:
         sound_data = data_source.file_data_for_cue_id(cue_id)
         if save_wav:

@@ -37,6 +37,7 @@ rn_equip = config.getboolean("abunpack", "rename_equip")
 sp_remove_type_ext = config.getboolean("abunpack", "spine_remove_type_ext")
 sp_folder_skin_id_remove = config.getboolean("abunpack", "spine_folder_skin_id_remove")
 sp_folder_original_name = config.getboolean("abunpack", "spine_folder_original_name")
+override = config.getboolean("main", "override")
 
 logger = logging.getLogger("AssetBundle")
 
@@ -108,6 +109,9 @@ class Resource:
             logger.info(f"-> Pass(No data)")
             return
         path = os.path.join(output_dir, self.path, f"{self.name}.{self.ext}")
+        if not override and os.path.isfile(path):
+            logger.info(f"-> Pass(File already exists)")
+            return
         os.makedirs(os.path.split(path)[0], exist_ok=True)
         mode = {'mode': 'w', 'encoding': 'utf-8'} if self.type == 'text' else {'mode': 'wb'}
         with open(path, **mode) as f:
