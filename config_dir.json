@@ -3,7 +3,7 @@
   "assets/resources/dabao/profilesconfig": "text/profilesconfig",
   "assets/resources/dabao/pics/icons/equip": "icon/equip",
   "assets/characters//pic": "pic",
-  "assets/characters//pic_he": "pic",
+  "assets/characters//pic_he": "pic/he",
   "assets/characters//spine": "spine",
   "assets/sprites/ui/icon/skillicon": "icon/skillicon",
   "_extra":{

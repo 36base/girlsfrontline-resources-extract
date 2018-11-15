@@ -404,7 +404,7 @@ class Asset():
                     name = rename.normalize(name)
                 res.set_path(new_path, name)
             elif eq_path(path, "assets/characters//pic_he"):
-                res.set_path(cf_dir["assets/sprites/ui/icon/skillicon"], name)
+                res.set_path(cf_dir["assets/characters//pic_he"], name)
 
             # Character::spine (인형 SD)
             elif eq_path(path, "assets/characters//spine"):
