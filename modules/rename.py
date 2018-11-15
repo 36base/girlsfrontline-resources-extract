@@ -183,6 +183,8 @@ class Doll():
                 else:
                     # 스킨 정보 불일치 + 스킨 id 미존재
                     self.flag = 'E'
+            else:
+                self.ret.extend([str(n) for n in [doll_name, skin_id] if n])
 
             # remove_n 옵션 확인 후 True 인 경우 그냥 넘어감
             # 그렇지 않으면 기존 flag 도 append
