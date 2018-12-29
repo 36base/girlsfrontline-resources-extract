@@ -251,6 +251,47 @@ class Asset():
         else:
             return None
 
+    '''
+    attempt to find alpha image for the given image
+    returns nothing if not found
+    currently it contains hardcoded path for some files
+
+    perhaps it is possible to get the reference directly?
+    https://docs.unity3d.com/2017.4/Documentation/ScriptReference/Sprite.html
+    '''
+    def get_alpha_image(self, path_id: int):
+        # 알파 이미지 위치를 찾기 위한 변수.
+        # 예시: assets/character/m1918/pic/pic_m1918, png
+        # split fromt right, once, because filename "no.1.png" exist
+        im_a_dir, im_a_ext = self.container[path_id].rsplit('.', maxsplit=1)
+        # 예시: assets/character/m1918/pic/pic_m1918_alpha.png
+        im_a_path = im_a_dir + "_alpha." + im_a_ext
+
+        # really bad practice, may break if filename changes
+        if im_a_path in self.container.values():
+            #generic filename found
+            return self.get_resource(self.find_path_id(im_a_path)).image
+        elif "npc-havel2" in im_a_dir:
+            im_a_path = "assets/characters/npc-havel/pic/npc-havel_alpha.png"
+        elif "/an94_" in im_a_dir:
+            im_a_path = "assets/characters/an94/pic/an94_angry_alpha.png"
+        elif "/ak12_" in im_a_dir:
+            im_a_path = "assets/characters/ak12/pic/ak12_angry_alpha.png"
+        elif "/pic_bb_noel_1" in im_a_dir:
+            im_a_path = "assets/characters/bb_noel/pic/pic_bb_noel_alpha.png"
+        elif "/pic_ro635_noarmor" in im_a_dir:
+            im_a_path = "assets/characters/ro635_noarmor/pic/pic_ro635_noarmor0_alpha.png"
+        elif "/weaverelite_" in im_a_dir:
+            im_a_path = "assets/characters/bossweaver/pic/weaverelite_1_alpha.png"
+        elif "/weaver_3" in im_a_dir:
+            im_a_path = "assets/characters/bossweaver/pic/weaver_2_alpha.png"
+
+        if im_a_path in self.container.values():
+            # confirmed that the hardcoded path exist
+            return self.get_resource(self.find_path_id(im_a_path)).image
+        else:
+            return
+
     def get_resource(self, path_id: int):
         obj = self.asset.objects[path_id]
         if obj.type == 'Texture2D':
@@ -264,18 +305,13 @@ class Asset():
                 im_r, im_g, im_b = cv2.split(np.fromstring(
                     pyetc.decode_etc1(data.data, data.width, data.height), np.uint8
                 ).reshape(data.height, data.width, 4))[:3]
-                # 알파 이미지 위치를 찾기 위한 변수.
-                # 예시: assets/character/m1918/pic/pic_m1918, png
-                im_a_dir, im_a_ext = self.container[path_id].split('.')
-                # 예시: assets/character/m1918/pic/pic_m1918_alpha.png
-                im_a_path = im_a_dir + "_alpha." + im_a_ext
-                # 위에서 만든 im_a_path 가 처음에 만든 파일 목록에 있는지 확인
-                if im_a_path in self.container.values():
-                    # 재귀적으로 알파 채널 이미지 찾아옴
-                    im_a = self.get_resource(self.find_path_id(im_a_path)).image
+                # attempt to find alpha image
+                im_a = self.get_alpha_image(path_id)
+                # if we have alpha, try to merge
+                if im_a is not None:
                     # 알파 채널 이미지가 원래 이미지와 크기가 다른 경우가 있는 경우를 위한 리사이징
-                    if im_a.shape[:2] != (data.width, data.height):
-                        im_a = cv2.resize(im_a, None, fx=2, fy=2)
+                    if im_a.shape[:2] != (data.height, data.width):
+                        im_a = cv2.resize(im_a, None, fx=data.height/im_a.shape[0], fy=data.width/im_a.shape[1])
                     return ResImage(cv2.merge((im_b, im_g, im_r, im_a)), data.name)
                 else:
                     return ResImage(cv2.merge((im_b, im_g, im_r)), data.name)
@@ -285,8 +321,9 @@ class Asset():
                 ).reshape(data.height, data.width, 4), cv2.COLOR_BGR2RGBA)
                 return ResImage(im, data.name)
             elif data.format.name == 'RGBA32':
+                data_size = data.height * data.width * 4
                 # 이미지 포맷: RGBA32 -> RGBA
-                im = np.fromstring(data.data, 'uint8').reshape(data.height, data.width, 4)
+                im = np.fromstring(data.data[:data_size], dtype=np.uint8).reshape(data.height, data.width, 4)
                 # cv2에서는 BGRA 색역을 쓰기 때문에 변한
                 im = cv2.cvtColor(im, cv2.COLOR_BGRA2RGBA)
                 # 소전은 뒤집힌거 쓰니까 이미지 뒤집기
@@ -294,13 +331,13 @@ class Asset():
                 return ResImage(im, data.name)
             elif data.format.name == 'RGBA4444':
                 shape = (data.height, data.width)
+                data_size = data.height * data.width * 2
                 # numpy array로 변환 (아직 1차원 배열)
-                im_array = np.fromstring(data.data, dtype=np.uint8)
+                im_array = np.fromstring(data.data[:data_size], dtype=np.uint8)
                 # 비트 시프트 + 값 곱하기 후 3차원 배열로 만든 후 채널별로 분리
                 # 0x0 -> 0x00, 0x1 -> 0x11, ... , 0xF -> 0xFF
                 im_b, im_r = cv2.split((np.bitwise_and(im_array >> 4, 0x0f) * 17).reshape(*shape, 2))
                 im_a, im_g = cv2.split((np.bitwise_and(im_array, 0x0f) * 17).reshape(*shape, 2))
-                # 합쳐서 Return
                 return ResImage(cv2.flip(cv2.merge((im_b, im_g, im_r, im_a)), 0), data.name)
             elif data.format.name == 'ARGB32':
                 # 이미지 포맷: ARGB32 -> RGBA
@@ -319,7 +356,23 @@ class Asset():
                 # 간단하게 처리
                 data_size = data.height * data.width * 3
                 im_array = np.fromstring(data.data[:data_size], dtype=np.uint8).reshape(data.height, data.width, 3)
-                return ResImage(cv2.flip(cv2.cvtColor(im_array, cv2.COLOR_RGB2BGR), 0), data.name)
+                # attempt to find alpha image
+                im_a = self.get_alpha_image(path_id)
+                if im_a is not None:
+                    # 알파 채널 이미지가 원래 이미지와 크기가 다른 경우가 있는 경우를 위한 리사이징
+                    if im_a.shape[:2] != (data.height, data.width):
+                        im_a = cv2.resize(im_a, None, fx=data.height/im_a.shape[0], fy=data.width/im_a.shape[1])
+                    im_a = cv2.flip(im_a, 0) #will end up flipping alpha twice below.. is there a better way?
+                    rgba = cv2.cvtColor(im_array, cv2.COLOR_RGB2RGBA)
+                    try:
+                        rgba[:, :, 3] = im_a
+                    except ValueError:
+                        # skip alpha if we can't merge it back, for some odd reason this happens on certain files
+                        # (cafe chair texture.. etc) as of Dec 22, 2018 on both TW, and CN beta version
+                        logger.error("dimension mismatch between converted rgb/alpha data")
+                    return ResImage(cv2.flip(rgba, 0), data.name)
+                else:
+                    return ResImage(cv2.flip(cv2.cvtColor(im_array, cv2.COLOR_RGB2BGR), 0), data.name)
             else:
                 # 모르는 포맷은 그냥 건너뜀
                 return Resource(data.name)
