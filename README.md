@@ -30,4 +30,4 @@ PR은 언제나 환영합니다. 주석도 많이 달았습니다. 주로 만드
 - [x] GitHub Wiki 에 설명 깔끔하게 올리기
 
 ## Wiki
-[GitHub Wiki](/wiki)에 모든 가이드를 작성할 예정입니다. 참조해주세요.
+[GitHub Wiki](https://github.com/36base/girlsfrontline-resources-extract/wiki)에 모든 가이드를 작성할 예정입니다. 참조해주세요.
