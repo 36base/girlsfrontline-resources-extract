@@ -346,14 +346,17 @@ class Asset():
         모든 이미지와 텍스트류 파일을 저장하지만 특수 처리는 하지 않습니다.
         """
         for path_id, cnt in self.container.items():
-            self.save_original_resource(output_dir, path_id, cnt)
+            try:
+                logger.info(cnt)
+                self.save_original_resource(output_dir, path_id, cnt)
+            except Exception as e:
+                logger.exception("-> Pass: Exception occurred!!")
         return
     
     def save_processed_resource(self, output_dir, path_id, cnt):
         # split path
         path, name = os.path.split(cnt)
         name, ext = os.path.splitext(name)
-        logger.info(f"{path}/{name}{ext}")
         # resource get
         res = self.get_resource(path_id)
 
@@ -447,7 +450,11 @@ class Asset():
         """리소스를 처리한 후 저장. 모든 옵션(이름 바꾸기 등) 사용 가능
         """
         for path_id, cnt in self.container.items():
-            self.save_processed_resource(output_dir, path_id, cnt)
+            try:
+                logger.info(cnt)
+                self.save_processed_resource(output_dir, path_id, cnt)
+            except Exception as e:
+                logger.exception("-> Pass: Exception occurred!!")
         return
 
 
