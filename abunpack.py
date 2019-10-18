@@ -333,112 +333,129 @@ class Asset():
                 return ResBytes(data.bytes, data.name)
         else:
             return Resource()
+    
+    def save_original_resource(self, output_dir, path_id, cnt):
+        """개별 함수로 분리
+        """
+        res = self.get_resource(path_id)
+        res.set_path(*os.path.split(cnt))
+        res.save(output_dir)
 
     def save_original_resources(self, output_dir):
         """어셋번들 내 파일들을 경로 그대로 저장.
         모든 이미지와 텍스트류 파일을 저장하지만 특수 처리는 하지 않습니다.
         """
         for path_id, cnt in self.container.items():
-            res = self.get_resource(path_id)
-            res.set_path(*os.path.split(cnt))
-            res.save(output_dir)
+            try:
+                logger.info(cnt)
+                self.save_original_resource(output_dir, path_id, cnt)
+            except Exception as e:
+                logger.exception("-> Pass: Exception occurred!!")
         return
+    
+    def save_processed_resource(self, output_dir, path_id, cnt):
+        # split path
+        path, name = os.path.split(cnt)
+        name, ext = os.path.splitext(name)
+        # resource get
+        res = self.get_resource(path_id)
 
-    def save_processed_resources(self, output_dir):
+        if use_object_name:
+            name = res.obj_name
+
+        # Resources::Text::table
+        if eq_path(path, "assets/resources/dabao/table"):
+            if name == "tableconfig":
+                res.set_path("text/table", "tableconfig")
+            else:
+                res.table()
+                res.set_path(cf_dir["assets/resources/dabao/table"], name)
+
+        # Resources::Text::profilesconfig (인형 대사 등등)
+        elif eq_path(path, "assets/resources/dabao/profilesconfig"):
+            res.profilesconfig(name)
+            res.set_path(cf_dir["assets/resources/dabao/profilesconfig"], name)
+
+        # Resources::icon::equip (장비 아이콘)
+        elif eq_path(path, "assets/resources/dabao/pics/icons/equip"):
+            new_path = cf_dir["assets/resources/dabao/pics/icons/equip"]
+            if rn_equip:
+                # 장비 이름 변경
+                rn = rename.Equip(name)
+                name = rn.get_name()
+                # 이름 변경 오류시(한자 포함 등등) 더미폴더로 이동
+                if rn.flag == 'E':
+                    new_path = os.path.join(new_path, "dummy")
+            res.set_path(new_path, name)
+
+        # Character::pic (인형 일러스트)
+        elif eq_path(path, "assets/characters//pic"):
+            new_path = cf_dir["assets/characters//pic"]
+            char_name = path.split('/')[2]
+            if rn_doll:
+                # 인형 이름 바꾸기 + 옵션 전달
+                rn = rename.Doll(name, rn_doll_id, rn_doll_skin_id, rn_remove_n)
+                name = rn.get_name()
+                if rn.flag == 'E':
+                    # Flag가 E(오류)면 더미 폴더 이동. 필요에 따라 인형별 폴더 분리
+                    new_path = f"pic/dummy/{char_name}" if split_dummy_image_folder else "pic/dummy"
+                if rn.flag == 'N' and rn_remove_n:
+                    # 옵션에 따라 _N이 붙은 이미지들의 _N을 지우고 별도 폴더 이동
+                    new_path = "pic/portraits"
+                if rn.flag == 'N' and make_doll_icon:
+                    # 옵션값 참이면 _N 이미지 기반으로 아이콘 생섣
+                    res.make_icon(rn.rank, name, cf_dir["_etc"]["characters/pic/icon"], output_dir)
+            elif name_normalize:
+                name = rename.normalize(name)
+            res.set_path(new_path, name)
+        elif eq_path(path, "assets/characters//pic_he"):
+            res.set_path(cf_dir["assets/characters//pic_he"], name)
+
+        # Character::spine (인형 SD)
+        elif eq_path(path, "assets/characters//spine"):
+            new_path = path.split('/')[2]
+            if sp_remove_type_ext and res.ext in ["bytes", "txt"]:
+                # 필요없는 확장자 제거 옵션
+                res.ext = ""
+            if sp_folder_skin_id_remove:
+                # 폴더 이름에 (찾을 수 있으면) 대문자 포함된 이름 사용
+                new_path = rename.path_rename(path, original_name=sp_folder_original_name)
+            res.set_path(f"{cf_dir['assets/characters//spine']}/{new_path}", name)
+
+        # Sprites::skilicon (스킬 아이콘)
+        elif eq_path(path, "assets/sprites/ui/icon/skillicon"):
+            if force_alpha_channel_remove and isinstance(res, ResImage):
+                # 알파 채널 이미지 강제 제거 여부에 따른 결과
+                res.remove_alpha_channel()
+            res.set_path(cf_dir["assets/sprites/ui/icon/skillicon"], name)
+
+        else:
+            # 기타 단순 저장 목록들
+            for n, m in cf_dir["_extra"].items():
+                if eq_path(path, n):
+                    res.set_path(m, name)
+                    break
+                else:
+                    continue
+            # 예외처리
+            else:
+                logger.info("-> Pass(file not in config_dir list)")
+                continue
+
+        # 저장
+        res.save(output_dir)
+        return
+    
+     def save_processed_resources(self, output_dir):
         """리소스를 처리한 후 저장. 모든 옵션(이름 바꾸기 등) 사용 가능
         """
         for path_id, cnt in self.container.items():
-            # split path
-            path, name = os.path.split(cnt)
-            name, ext = os.path.splitext(name)
-            logger.info(f"{path}/{name}{ext}")
-            # resource get
-            res = self.get_resource(path_id)
-
-            if use_object_name:
-                name = res.obj_name
-
-            # Resources::Text::table
-            if eq_path(path, "assets/resources/dabao/table"):
-                if name == "tableconfig":
-                    res.set_path("text/table", "tableconfig")
-                else:
-                    res.table()
-                    res.set_path(cf_dir["assets/resources/dabao/table"], name)
-
-            # Resources::Text::profilesconfig (인형 대사 등등)
-            elif eq_path(path, "assets/resources/dabao/profilesconfig"):
-                res.profilesconfig(name)
-                res.set_path(cf_dir["assets/resources/dabao/profilesconfig"], name)
-
-            # Resources::icon::equip (장비 아이콘)
-            elif eq_path(path, "assets/resources/dabao/pics/icons/equip"):
-                new_path = cf_dir["assets/resources/dabao/pics/icons/equip"]
-                if rn_equip:
-                    # 장비 이름 변경
-                    rn = rename.Equip(name)
-                    name = rn.get_name()
-                    # 이름 변경 오류시(한자 포함 등등) 더미폴더로 이동
-                    if rn.flag == 'E':
-                        new_path = os.path.join(new_path, "dummy")
-                res.set_path(new_path, name)
-
-            # Character::pic (인형 일러스트)
-            elif eq_path(path, "assets/characters//pic"):
-                new_path = cf_dir["assets/characters//pic"]
-                char_name = path.split('/')[2]
-                if rn_doll:
-                    # 인형 이름 바꾸기 + 옵션 전달
-                    rn = rename.Doll(name, rn_doll_id, rn_doll_skin_id, rn_remove_n)
-                    name = rn.get_name()
-                    if rn.flag == 'E':
-                        # Flag가 E(오류)면 더미 폴더 이동. 필요에 따라 인형별 폴더 분리
-                        new_path = f"pic/dummy/{char_name}" if split_dummy_image_folder else "pic/dummy"
-                    if rn.flag == 'N' and rn_remove_n:
-                        # 옵션에 따라 _N이 붙은 이미지들의 _N을 지우고 별도 폴더 이동
-                        new_path = "pic/portraits"
-                    if rn.flag == 'N' and make_doll_icon:
-                        # 옵션값 참이면 _N 이미지 기반으로 아이콘 생섣
-                        res.make_icon(rn.rank, name, cf_dir["_etc"]["characters/pic/icon"], output_dir)
-                elif name_normalize:
-                    name = rename.normalize(name)
-                res.set_path(new_path, name)
-            elif eq_path(path, "assets/characters//pic_he"):
-                res.set_path(cf_dir["assets/characters//pic_he"], name)
-
-            # Character::spine (인형 SD)
-            elif eq_path(path, "assets/characters//spine"):
-                new_path = path.split('/')[2]
-                if sp_remove_type_ext and res.ext in ["bytes", "txt"]:
-                    # 필요없는 확장자 제거 옵션
-                    res.ext = ""
-                if sp_folder_skin_id_remove:
-                    # 폴더 이름에 (찾을 수 있으면) 대문자 포함된 이름 사용
-                    new_path = rename.path_rename(path, original_name=sp_folder_original_name)
-                res.set_path(f"{cf_dir['assets/characters//spine']}/{new_path}", name)
-
-            # Sprites::skilicon (스킬 아이콘)
-            elif eq_path(path, "assets/sprites/ui/icon/skillicon"):
-                if force_alpha_channel_remove and isinstance(res, ResImage):
-                    # 알파 채널 이미지 강제 제거 여부에 따른 결과
-                    res.remove_alpha_channel()
-                res.set_path(cf_dir["assets/sprites/ui/icon/skillicon"], name)
-
-            else:
-                # 기타 단순 저장 목록들
-                for n, m in cf_dir["_extra"].items():
-                    if eq_path(path, n):
-                        res.set_path(m, name)
-                        break
-                    else:
-                        continue
-                # 예외처리
-                else:
-                    logger.info("-> Pass(file not in config_dir list)")
-                    continue
-
-            # 저장
-            res.save(output_dir)
+            try:
+                logger.info(cnt)
+                self.save_processed_resource(output_dir, path_id, cnt)
+            except Exception as e:
+                logger.exception("-> Pass: Exception occurred!!")
+        return
 
 
 def abunpack(file_dir: str, output_dir: str):
