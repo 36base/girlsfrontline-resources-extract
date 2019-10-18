@@ -440,13 +440,12 @@ class Asset():
             # 예외처리
             else:
                 logger.info("-> Pass(file not in config_dir list)")
-                continue
 
         # 저장
         res.save(output_dir)
         return
     
-     def save_processed_resources(self, output_dir):
+    def save_processed_resources(self, output_dir):
         """리소스를 처리한 후 저장. 모든 옵션(이름 바꾸기 등) 사용 가능
         """
         for path_id, cnt in self.container.items():
