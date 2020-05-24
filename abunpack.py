@@ -261,7 +261,7 @@ class Asset():
             if data.format.name == 'ETC_RGB4':
                 # 이미지 포맷: ETC1 -> RGB(A)
                 # Alpha 채널도 나오긴 하는데 의미 없어서 자름
-                im_r, im_g, im_b = cv2.split(np.fromstring(
+                im_r, im_g, im_b = cv2.split(np.frombuffer(
                     pyetc.decode_etc1(data.data, data.width, data.height), np.uint8
                 ).reshape(data.height, data.width, 4))[:3]
                 # 알파 이미지 위치를 찾기 위한 변수.
@@ -274,19 +274,19 @@ class Asset():
                     # 재귀적으로 알파 채널 이미지 찾아옴
                     im_a = self.get_resource(self.find_path_id(im_a_path)).image
                     # 알파 채널 이미지가 원래 이미지와 크기가 다른 경우가 있는 경우를 위한 리사이징
-                    if im_a.shape[:2] != (data.width, data.height):
-                        im_a = cv2.resize(im_a, None, fx=2, fy=2)
+                    if im_a.shape[:2] != (data.height, data.width):
+                        im_a = cv2.resize(im_a, None, fx=data.width // im_a.shape[1], fy=data.height // im_a.shape[1])
                     return ResImage(cv2.merge((im_b, im_g, im_r, im_a)), data.name)
                 else:
                     return ResImage(cv2.merge((im_b, im_g, im_r)), data.name)
             elif data.format.name == "ETC2_RGBA8":
-                im = cv2.cvtColor(np.fromstring(
+                im = cv2.cvtColor(np.frombuffer(
                     pyetc.decode_etc2a8(data.data, data.width, data.height), np.uint8
                 ).reshape(data.height, data.width, 4), cv2.COLOR_BGR2RGBA)
                 return ResImage(im, data.name)
             elif data.format.name == 'RGBA32':
                 # 이미지 포맷: RGBA32 -> RGBA
-                im = np.fromstring(data.data, 'uint8').reshape(data.height, data.width, 4)
+                im = np.frombuffer(data.data, 'uint8').reshape(data.height, data.width, 4)
                 # cv2에서는 BGRA 색역을 쓰기 때문에 변한
                 im = cv2.cvtColor(im, cv2.COLOR_BGRA2RGBA)
                 # 소전은 뒤집힌거 쓰니까 이미지 뒤집기
@@ -295,7 +295,7 @@ class Asset():
             elif data.format.name == 'RGBA4444':
                 shape = (data.height, data.width)
                 # numpy array로 변환 (아직 1차원 배열)
-                im_array = np.fromstring(data.data, dtype=np.uint8)
+                im_array = np.frombuffer(data.data, dtype=np.uint8)
                 # 비트 시프트 + 값 곱하기 후 3차원 배열로 만든 후 채널별로 분리
                 # 0x0 -> 0x00, 0x1 -> 0x11, ... , 0xF -> 0xFF
                 im_b, im_r = cv2.split((np.bitwise_and(im_array >> 4, 0x0f) * 17).reshape(*shape, 2))
@@ -307,18 +307,18 @@ class Asset():
                 # 채널별로 분리 후 다시 합침
                 # 이상하게 원래 크기 이상으로 뭔가 데이터가 있는데 딱히 필요는 없어서 모양으로 계산해서 필요한 부분만 슬라이싱
                 data_size = data.height * data.width * 4
-                im_array = np.fromstring(data.data[:data_size], dtype=np.uint8).reshape(data.height, data.width, 4)
+                im_array = np.frombuffer(data.data[:data_size], dtype=np.uint8).reshape(data.height, data.width, 4)
                 im_a, im_r, im_g, im_b = cv2.split(cv2.flip(im_array, 0))
                 return ResImage(cv2.merge((im_b, im_g, im_r, im_a)), data.name)
             elif data.format.name == 'Alpha8':
                 # 알파 이미지
                 shape = (data.height, data.width)
-                return ResImage(cv2.flip(np.fromstring(data.data, "uint8").reshape(shape), 0), data.name)
+                return ResImage(cv2.flip(np.frombuffer(data.data, "uint8").reshape(shape), 0), data.name)
             elif data.format.name == 'RGB24':
                 # 이미지 포맷: RGB24 -> RGB
                 # 간단하게 처리
                 data_size = data.height * data.width * 3
-                im_array = np.fromstring(data.data[:data_size], dtype=np.uint8).reshape(data.height, data.width, 3)
+                im_array = np.frombuffer(data.data[:data_size], dtype=np.uint8).reshape(data.height, data.width, 3)
                 return ResImage(cv2.flip(cv2.cvtColor(im_array, cv2.COLOR_RGB2BGR), 0), data.name)
             else:
                 # 모르는 포맷은 그냥 건너뜀

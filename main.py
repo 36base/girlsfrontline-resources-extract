@@ -11,7 +11,7 @@ import abunpack
 import acb2wav
 
 
-__version__ = "2.2.2"
+__version__ = "2.2.4"
 
 
 def main():
