@@ -325,7 +325,10 @@ class TrackList(object):
             if row["ReferenceType"] not in {3, 8}:
                 raise RuntimeError("ReferenceType {0} not implemented.".format(row["ReferenceType"]))
 
-            r_data = syns.rows[row["ReferenceIndex"]]["ReferenceItems"]
+            try:
+                r_data = syns.rows[row["ReferenceIndex"]]["ReferenceItems"]
+            except IndexError:
+                continue
             a, b = struct.unpack(">HH", r_data)
 
             wav_id = wavs.rows[b].get("Id")

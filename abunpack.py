@@ -285,8 +285,10 @@ class Asset():
                 ).reshape(data.height, data.width, 4), cv2.COLOR_BGR2RGBA)
                 return ResImage(im, data.name)
             elif data.format.name == 'RGBA32':
+                # 이상하게 원래 크기 이상으로 뭔가 데이터가 있는데 딱히 필요는 없어서 모양으로 계산해서 필요한 부분만 슬라이싱 (2)
+                data_size = data.height * data.width * 4
                 # 이미지 포맷: RGBA32 -> RGBA
-                im = np.frombuffer(data.data, 'uint8').reshape(data.height, data.width, 4)
+                im = np.frombuffer(data.data[:data_size], 'uint8').reshape(data.height, data.width, 4)
                 # cv2에서는 BGRA 색역을 쓰기 때문에 변한
                 im = cv2.cvtColor(im, cv2.COLOR_BGRA2RGBA)
                 # 소전은 뒤집힌거 쓰니까 이미지 뒤집기
